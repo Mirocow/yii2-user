@@ -28,6 +28,5 @@
         "psr-0": {
             "yii\\user\\": ""
         }
-    },	
-    "target-dir": "user"
+    },
 }
