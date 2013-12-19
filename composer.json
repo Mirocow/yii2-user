@@ -1,22 +1,33 @@
 {
-    "name": "amnah/yii2-user",
+    "name": "mirocow/yii2-user",
     "description": "Yii 2 user authentication module",
     "keywords": ["yii", "yii2", "user", "auth", "authentication"],
     "type": "yii2-extension",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/Mirocow/yii2-user/issues?state=open",
+        "wiki": "http://www.yiidoc.com/wiki/",
+        "source": "https://github.com/Mirocow/yii2-user"
+    },	
     "authors": [
         {
             "name": "amnah",
             "email": "amnah.dev@gmail.com"
-        }
+        },
+        {
+            "name": "Mirocow",
+            "email": "mr.mirocow@gmail.com",
+            "homepage": "http://www.mirocow.com"
+        }			
     ],
+	"minimum-stability": "dev",
     "require": {
         "yiisoft/yii2": "*"
     },
     "autoload": {
         "psr-0": {
-            "amnah\\yii2\\user\\": ""
+            "yii\\user\\": ""
         }
-    },
-    "target-dir": "amnah/yii2/user"
+    },	
+    "target-dir": "mirocow/yii2-user"
 }
