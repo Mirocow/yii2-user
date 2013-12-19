@@ -1,6 +1,6 @@
 <?php
 
-namespace amnah\yii2\user\components;
+namespace mirocow\user\components;
 
 use Yii;
 
@@ -12,7 +12,7 @@ class User extends \yii\web\User {
     /**
      * @inheritdoc
      */
-    public $identityClass = "amnah\yii2\user\models\User";
+    public $identityClass = "mirocow\user\models\User";
 
     /**
      * @inheritdoc

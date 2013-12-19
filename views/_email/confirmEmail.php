@@ -1,8 +1,8 @@
 <?php
 
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Profile;
-use amnah\yii2\user\models\Userkey;
+use mirocow\user\models\User;
+use mirocow\user\models\Profile;
+use mirocow\user\models\Userkey;
 
 /**
  * @var string $subject

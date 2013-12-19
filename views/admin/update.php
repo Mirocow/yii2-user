@@ -4,8 +4,8 @@ use yii\helpers\Html;
 
 /**
  * @var yii\web\View $this
- * @var amnah\yii2\user\models\User $user
- * @var amnah\yii2\user\models\Profile $profile
+ * @var mirocow\user\models\User $user
+ * @var mirocow\user\models\Profile $profile
  */
 
 $this->title = 'Update User: ' . $user->id;

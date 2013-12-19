@@ -1,6 +1,6 @@
 <?php
 
-namespace amnah\yii2\user;
+namespace mirocow\user;
 
 use Yii;
 use yii\base\InvalidConfigException;
@@ -15,7 +15,7 @@ class Module extends \yii\base\Module {
     /**
      * @inheritdoc
      */
-    public $controllerNamespace = "amnah\yii2\user\controllers";
+    public $controllerNamespace = "mirocow\user\controllers";
 
     /**
      * @var string Alias for module

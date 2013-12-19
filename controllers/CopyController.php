@@ -1,6 +1,6 @@
 <?php
 
-namespace amnah\yii2\user\controllers;
+namespace mirocow\user\controllers;
 
 use Yii;
 use yii\web\HttpException;

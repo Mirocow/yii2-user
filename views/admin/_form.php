@@ -2,13 +2,13 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Role;
+use mirocow\user\models\User;
+use mirocow\user\models\Role;
 
 /**
  * @var yii\web\View $this
- * @var amnah\yii2\user\models\User $user
- * @var amnah\yii2\user\models\Profile $profile
+ * @var mirocow\user\models\User $user
+ * @var mirocow\user\models\Profile $profile
  * @var yii\widgets\ActiveForm $form
  */
 ?>

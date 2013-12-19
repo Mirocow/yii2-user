@@ -1,11 +1,11 @@
 <?php
 
-namespace amnah\yii2\user\models\forms;
+namespace mirocow\user\models\forms;
 
 use Yii;
 use yii\base\Model;
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Userkey;
+use mirocow\user\models\User;
+use mirocow\user\models\Userkey;
 
 /**
  * LoginForm is the model behind the login form.

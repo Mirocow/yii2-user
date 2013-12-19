@@ -1,14 +1,14 @@
 <?php
 
-namespace amnah\yii2\user\controllers;
+namespace mirocow\user\controllers;
 
 use Yii;
 use yii\web\Controller;
 use yii\web\HttpException;
 use yii\web\VerbFilter;
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Profile;
-use amnah\yii2\user\models\search\UserSearch;
+use mirocow\user\models\User;
+use mirocow\user\models\Profile;
+use mirocow\user\models\search\UserSearch;
 
 /**
  * AdminController implements the CRUD actions for User model.

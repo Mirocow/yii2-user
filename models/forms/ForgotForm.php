@@ -1,12 +1,12 @@
 <?php
 
-namespace amnah\yii2\user\models\forms;
+namespace mirocow\user\models\forms;
 
 use Yii;
 use yii\base\Model;
 use yii\swiftmailer\Mailer;
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Userkey;
+use mirocow\user\models\User;
+use mirocow\user\models\Userkey;
 
 /**
  * Forgot password form

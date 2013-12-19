@@ -2,14 +2,14 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Role;
-//use amnah\yii2\grid\RelatedDataColumn;
+use mirocow\user\models\User;
+use mirocow\user\models\Role;
+//use mirocow\grid\RelatedDataColumn;
 
 /**
  * @var yii\web\View $this
  * @var yii\data\ActiveDataProvider $dataProvider
- * @var amnah\yii2\user\models\search\UserSearch $searchModel
+ * @var mirocow\user\models\search\UserSearch $searchModel
  */
 
 $this->title = 'Users';

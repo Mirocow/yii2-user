@@ -29,5 +29,5 @@
             "yii\\user\\": ""
         }
     },	
-    "target-dir": "mirocow/yii2-user"
+    "target-dir": "user"
 }

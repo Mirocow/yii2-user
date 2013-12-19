@@ -1,19 +1,19 @@
 <?php
 
-namespace amnah\yii2\user\controllers;
+namespace mirocow\user\controllers;
 
 use Yii;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\web\AccessControl;
 use yii\widgets\ActiveForm;
-use amnah\yii2\user\models\User;
-use amnah\yii2\user\models\Profile;
-use amnah\yii2\user\models\Role;
-use amnah\yii2\user\models\Userkey;
-use amnah\yii2\user\models\forms\LoginForm;
-use amnah\yii2\user\models\forms\ForgotForm;
-use amnah\yii2\user\models\forms\ResetForm;
+use mirocow\user\models\User;
+use mirocow\user\models\Profile;
+use mirocow\user\models\Role;
+use mirocow\user\models\Userkey;
+use mirocow\user\models\forms\LoginForm;
+use mirocow\user\models\forms\ForgotForm;
+use mirocow\user\models\forms\ResetForm;
 
 
 /**
