@@ -22,7 +22,7 @@ class Profile extends ActiveRecord {
      * @inheritdoc
      */
     public static function tableName() {
-        return Yii::$app->db->tablePrefix . 'profile';
+        return '{{%profile}}';
     }
 
     /**
@@ -33,7 +33,7 @@ class Profile extends ActiveRecord {
 //            [['user_id'], 'required'],
 //            [['user_id'], 'integer'],
 //            [['create_time', 'update_time'], 'safe'],
-            [['full_name'], 'string', 'max' => 255]
+//            [['full_name'], 'string', 'max' => 255]
         ];
     }
 
@@ -76,10 +76,11 @@ class Profile extends ActiveRecord {
      * @return static
      */
     public function register($userId) {
-
+        
         $this->user_id = $userId;
         $this->save(false);
         return $this;
+        
     }
 
     /**

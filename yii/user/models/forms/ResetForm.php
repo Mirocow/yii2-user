@@ -5,7 +5,7 @@ namespace yii\user\models\forms;
 use Yii;
 use yii\base\Model;
 use yii\user\models\User;
-use yii\user\models\Userkey;
+use yii\user\models\Session;
 
 /**
  * Reset password form
@@ -13,9 +13,9 @@ use yii\user\models\Userkey;
 class ResetForm extends Model {
 
     /**
-     * @var Userkey
+     * @var Session
      */
-    public $userkey;
+    public $session;
 
     /**
      * @var string
@@ -46,7 +46,7 @@ class ResetForm extends Model {
         $rules = [
 //            [["email"], "required"],
 //            [["email"], "email"],
-//            [["email"], "validateUserkeyEmail"],
+//            [["email"], "validateSessionEmail"],
 //            [["email"], "filter", "filter" => "trim"],
             [["newPassword", "newPasswordConfirm"], "required"],
             [["newPasswordConfirm"], "compare", "compareAttribute" => "newPassword", "message" => "Passwords do not match"]
@@ -95,7 +95,7 @@ class ResetForm extends Model {
     /**
      * Validate proper email
      */
-    public function validateUserkeyEmail() {
+    public function validateSessionEmail() {
 
         // compare user's email
         $user = $this->getUser();
@@ -125,7 +125,7 @@ class ResetForm extends Model {
         if ($this->_user === false) {
 
             // get user
-            $this->_user = User::find($this->userkey->user_id);
+            $this->_user = User::find($this->session->user_id);
         }
 
         // return stored user
@@ -147,9 +147,9 @@ class ResetForm extends Model {
             $user->newPassword = $this->newPassword;
             $user->save(false);
 
-            // consume userkey
-            $userkey = $this->userkey;
-            $userkey->consume();
+            // consume session
+            $session = $this->session;
+            $session->consume();
 
             return true;
         }

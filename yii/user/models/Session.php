@@ -7,7 +7,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\Security;
 
 /**
- * Userkey model
+ * Session model
  *
  * @property string $id
  * @property string $user_id
@@ -19,28 +19,28 @@ use yii\helpers\Security;
  *
  * @property User $user
  */
-class Userkey extends ActiveRecord {
+class Session extends ActiveRecord {
 
     /**
      * @var int Key for email activations (=registering)
      */
-    const TYPE_EMAIL_ACTIVATE = 1;
+    const TYPE_EMAIL_ACTIVATE = 'EMAIL_ACTIVATE';
 
     /**
      * @var int Key for email changes (=updating account page)
      */
-    const TYPE_EMAIL_CHANGE = 2;
+    const TYPE_EMAIL_CHANGE = 'EMAIL_CHANGE';
 
     /**
      * @var int Key for password resets
      */
-    const TYPE_PASSWORD_RESET = 3;
+    const TYPE_PASSWORD_RESET = 'PASSWORD_RESET';
 
     /**
      * @inheritdoc
      */
     public static function tableName() {
-        return Yii::$app->db->tablePrefix . 'userkey';
+        return '{{%session}}';
     }
 
     /**
@@ -48,10 +48,11 @@ class Userkey extends ActiveRecord {
      */
     public function rules() {
         return [
-            [['user_id', 'type', 'key'], 'required'],
-            [['user_id', 'type'], 'integer'],
+            [['user_id', 'type', 'sid'], 'required'],
+            [['user_id'], 'integer'],
+            [['type'], 'string'],
             [['create_time', 'consume_time', 'expire_time'], 'safe'],
-            [['key'], 'string', 'max' => 255]
+            [['sid'], 'string', 'max' => 255]
         ];
     }
 
@@ -63,7 +64,7 @@ class Userkey extends ActiveRecord {
             'id' => 'ID',
             'user_id' => 'User ID',
             'type' => 'Type',
-            'key' => 'Key',
+            'sid' => 'User SID Key',
             'create_time' => 'Create Time',
             'consume_time' => 'Consume Time',
             'expire_time' => 'Expire Time',
@@ -92,9 +93,18 @@ class Userkey extends ActiveRecord {
             ],
         ];
     }
+    
+    /**
+     * @inheritdoc
+     */
+    public function beforeSave($insert) {
+        $this->ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+        $this->user_agent = Yii::$app->getRequest()->getUserAgent();
+        return parent::beforeSave($insert);
+    }    
 
     /**
-     * Generate and return a new userkey
+     * Generate and return a new session
      *
      * @param int $userId
      * @param int $type
@@ -115,20 +125,25 @@ class Userkey extends ActiveRecord {
         $model->type = $type;
         $model->create_time = date("Y-m-d H:i:s");
         $model->expire_time = $expireTime;
-        $model->key = Security::generateRandomKey();
+        $model->sid = Security::generateRandomKey();
         $model->save();
+        
+        if($model->hasErrors()){
+            throw new HttpException(500, 'Can`t create session.');
+        }
 
         return $model;
     }
 
     /**
-     * Find an active userkey
+     * Find an active session
      *
      * @param int $userId
      * @param int $type
      * @return static
      */
     public static function findActiveByUser($userId, $type) {
+        
         return static::find()
             ->where([
                 "user_id" => $userId,
@@ -137,46 +152,54 @@ class Userkey extends ActiveRecord {
             ])
             ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
             ->one();
+            
     }
 
     /**
-     * Find a userkey object for confirming
+     * Find a session object for confirming
      *
      * @param string $key
      * @param int|string $type
      * @return static
      */
-    public static function findActiveByKey($key, $type) {
+    public static function findActiveByKey($hash, $sid, $type) {
 
         return static::find()
-            ->where([
-                "key" => $key,
+            ->getUser()
+            ->where([                
+                "sid" => $sid,
                 "type" => $type,
                 "consume_time" => null,
             ])
             ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
+            ->andWhere("{{%user}}.hash = '{$hash}'")
             ->one();
+            
     }
 
     /**
-     * Consume userkey record
+     * Consume session record
      *
      * @return static
      */
     public function consume() {
+        
         $this->consume_time = date("Y-m-d H:i:s");
         $this->save(false);
         return $this;
+        
     }
 
     /**
-     * Expire userkey record
+     * Expire session record
      *
      * @return static
      */
     public function expire() {
+        
         $this->expire_time = date("Y-m-d H:i:s");
         $this->save(false);
         return $this;
+        
     }
 }

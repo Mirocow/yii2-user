@@ -4,7 +4,8 @@ namespace yii\user\models;
 
 use Yii;
 use yii\db\ActiveRecord;
-use ReflectionClass;
+use yii\user\models\UserRole;
+//use ReflectionClass;
 
 /**
  * Role model
@@ -32,13 +33,13 @@ class Role extends ActiveRecord {
     /**
      * @var int Guest user role
      */
-    const ROLE_GUEST = 3;
+    //const ROLE_GUEST = 3;
 
     /**
      * @inheritdoc
      */
     public static function tableName() {
-        return Yii::$app->db->tablePrefix . 'role';
+        return '{{%role}}';
     }
 
     /**
@@ -47,6 +48,7 @@ class Role extends ActiveRecord {
     public function rules() {
         return [
             [['name'], 'required'],
+            [['machine_name'], 'required'],
             [['create_time', 'update_time'], 'safe'],
             [['can_admin'], 'boolean'],
             [['name'], 'string', 'max' => 255]
@@ -60,6 +62,7 @@ class Role extends ActiveRecord {
         return [
             'id' => 'ID',
             'name' => 'Name',
+            'machine_name' => 'Machine name',
             'create_time' => 'Create Time',
             'update_time' => 'Update Time',
             'can_admin' => 'Can Admin',
@@ -70,7 +73,7 @@ class Role extends ActiveRecord {
      * @return \yii\db\ActiveRelation
      */
     public function getUsers() {
-        return $this->hasMany(User::className(), ['role_id' => 'id']);
+        return $this->hasMany(UserRole::className(), ['role_id' => 'id']);
     }
 
     /**

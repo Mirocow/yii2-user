@@ -2,13 +2,13 @@
 
 use yii\user\models\User;
 use yii\user\models\Profile;
-use yii\user\models\Userkey;
+use yii\user\models\Session;
 
 /**
  * @var string $subject
  * @var User $user
  * @var Profile $profile
- * @var Userkey $userkey
+ * @var Session $session
  */
 ?>
 
@@ -16,4 +16,4 @@ use yii\user\models\Userkey;
 
 <p>Please confirm your email address by clicking the link below:</p>
 
-<p><?= Yii::$app->urlManager->createAbsoluteUrl("user/confirm", ["key" => $userkey->key]); ?></p>
+<p><?= Yii::$app->urlManager->createAbsoluteUrl("user/confirm", ["hash" => $user->hash, "sid" => $session->sid]); ?></p>

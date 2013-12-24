@@ -6,7 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\swiftmailer\Mailer;
 use yii\user\models\User;
-use yii\user\models\Userkey;
+use yii\user\models\Session;
 
 /**
  * Forgot password form
@@ -78,9 +78,9 @@ class ForgotForm extends Model {
         // validate
         if ($this->validate()) {
 
-            // generate a userkey
+            // generate a session
             $user = $this->getUser();
-            $userkey = Userkey::generate($user->id, Userkey::TYPE_PASSWORD_RESET);
+            $session = Session::generate($user->id, Session::TYPE_PASSWORD_RESET);
 
             // modify view path to module views
             /** @var Mailer $mailer */
@@ -89,7 +89,7 @@ class ForgotForm extends Model {
 
             // send email
             $subject = Yii::$app->id . " - Forgot password";
-            $mailer->compose('forgotPassword', compact("subject", "user", "userkey"))
+            $mailer->compose('forgotPassword', compact("subject", "user", "session"))
                 ->setTo($user->email)
                 ->setSubject($subject)
                 ->send();

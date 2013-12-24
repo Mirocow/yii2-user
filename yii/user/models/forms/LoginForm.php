@@ -5,7 +5,7 @@ namespace yii\user\models\forms;
 use Yii;
 use yii\base\Model;
 use yii\user\models\User;
-use yii\user\models\Userkey;
+use yii\user\models\Session;
 
 /**
  * LoginForm is the model behind the login form.
@@ -81,8 +81,8 @@ class LoginForm extends Model {
         }
         // check for inactive status
         if ($user->status == User::STATUS_INACTIVE) {
-            $userkey = Userkey::generate($user->id, Userkey::TYPE_EMAIL_ACTIVATE);
-            $user->sendEmailConfirmation($userkey);
+            $session = Session::generate($user->id, Session::TYPE_EMAIL_ACTIVATE);
+            $user->sendEmailConfirmation($session);
             $this->addError("username", "Email confirmation resent");
         }
     }

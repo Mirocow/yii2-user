@@ -1,12 +1,12 @@
 <?php
 
 use yii\user\models\User;
-use yii\user\models\Userkey;
+use yii\user\models\Session;
 
 /**
  * @var string $subject
  * @var User $user
- * @var Userkey $userkey
+ * @var Session $session
  */
 ?>
 
@@ -14,4 +14,4 @@ use yii\user\models\Userkey;
 
 <p>Please use this link to reset your password:</p>
 
-<p><?= Yii::$app->urlManager->createAbsoluteUrl("user/reset", ["key" => $userkey->key]); ?></p>
+<p><?= Yii::$app->urlManager->createAbsoluteUrl("user/reset", ["key" => $session->key]); ?></p>

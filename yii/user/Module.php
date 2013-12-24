@@ -42,6 +42,16 @@ class Module extends \yii\base\Module {
      * @var bool If true, users are required to enter a username
      */
     public $requireUsername = false;
+    
+    /**
+     * @var bool If true, users are required to enter an password or it`s generate automaticly
+     */
+    public $requirePassword = false;
+    
+    /**
+    * @var interger Length for autogererate 
+    */
+    public $passwordLength = 8;    
 
     /*
      * @var bool If true, users can enter an email. This is automatically set to true if $requireEmail = true
@@ -67,11 +77,30 @@ class Module extends \yii\base\Module {
      * @var int Login duration
      */
     public $loginDuration = 2592000;
+    
+    /**
+    * @var bool Action for show captcha
+    */
+    public $usedCaptcha = array('register');
+    
+    /**
+    * @var string Path for captcha generate
+    */
+    public $pathCaptcha = 'site/captcha';
 
     /**
      * @var string Email view path
      */
     public $emailViewPath = "@user/views/_email";
+    
+    public $views = '@user/views';
+    
+    public $controllers = '@user/controllers';
+    
+    /**
+    * @var bool If true, the user will be status active automaticly
+    */
+    public $userReristerActive = false;
 
     /**
      * @inheritdoc
@@ -83,6 +112,12 @@ class Module extends \yii\base\Module {
         $this->setAliases([
             $this->alias => __DIR__,
         ]);
+        
+        // set views path
+        $this->setViewPath($this->views);
+        
+        // set controllers path
+        $this->setControllerPath($this->controllers);
 
         // set use fields based on required fields
         if ($this->requireEmail) {
@@ -147,10 +182,23 @@ class Module extends \yii\base\Module {
     public function getActions() {
 
         return [
-            "User" => ["/{$this->id}"],
-            "Login" => ["/{$this->id}/login"],
+            "User" => [
+                'url' => ["/{$this->id}"],
+                "description" => "",
+            ],
+            
+            "Login" => [
+                'url' => ["/{$this->id}/login"],
+                'description' => '',
+            ],
+            
             "Logout" => ["/{$this->id}/logout"],
-            "Register" => ["/{$this->id}/register"],
+
+            "Register" => [
+                "url" => ["/{$this->id}/register&type=xxxxx"],
+                "description" => "Регистрация пользователя с указанием типа",
+            ],
+            
             "Account" => ["/{$this->id}/account"],
             "Profile" => ["/{$this->id}/profile"],
             "Forgot password" => ["/{$this->id}/forgot"],
@@ -173,6 +221,11 @@ class Module extends \yii\base\Module {
                 "url" => ["/{$this->id}/reset?key=xxxxxxxxxx"],
                 "description" => "Reset password. Automatically generated with key from 'Forgot password' page",
             ],
+            
+            'captcha' => [
+                    'url' => ['yii\captcha\CaptchaAction'],
+                    "description" => "Path for captcha generate",
+            ],            
         ];
     }
 }
