@@ -31,8 +31,6 @@ use yii\widgets\ActiveForm;
 
 		<?php // echo $form->field($model, 'status') ?>
 
-		<?php // echo $form->field($model, 'auth_key') ?>
-
 		<?php // echo $form->field($model, 'create_time') ?>
 
 		<?php // echo $form->field($model, 'update_time') ?>

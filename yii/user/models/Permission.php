@@ -14,12 +14,14 @@ namespace yii\user\models;
  */
 class Permission extends \yii\db\ActiveRecord
 {
+    const PERMISSION_DEFAULT = 'DEFAULT';
+    
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'tbl_permission';
+        return '{{%permission}}';
     }
 
     /**

@@ -9,6 +9,7 @@ use yii\swiftmailer\Mailer;
 use yii\helpers\Inflector;
 use yii\helpers\Security;
 use yii\user\models\UserRole;
+use yii\user\models\Role;
 use ReflectionClass;
 /**
  * User model
@@ -25,7 +26,6 @@ use ReflectionClass;
  * @property string $update_time
  * @property string $ban_time
  * @property string $ban_reason
- *
  * @property Profile $profile
  * @property Role $role
  * @property Session[] $sessions
@@ -164,7 +164,7 @@ class User extends ActiveRecord implements IdentityInterface {
             'new_email' => 'New Email',
             'username' => 'Username',
             'password' => 'Password',
-            'sid' => 'Hash (user key)',
+            'hash' => 'Hash (user key)',
             'status' => 'Status',
             //'auth_key' => 'Auth Key',
             'ban_time' => 'Ban Time',
@@ -239,14 +239,14 @@ class User extends ActiveRecord implements IdentityInterface {
      * @inheritdoc
      */
     public function getAuthKey() {
-        return $this->auth_key;
+        return $this->id;
     }
 
     /**
      * @inheritdoc
      */
     public function validateAuthKey($authKey) {
-        return $this->auth_key === $authKey;
+        return $this->id === $authKey;
     }
 
     /**
@@ -488,6 +488,17 @@ class User extends ActiveRecord implements IdentityInterface {
             $pass[] = $alphabet[$n];
         }
         return implode($pass); //turn the array into a string
+    }
+    
+    public function can($permission_name, $permission_type = Permission::PERMISSION_DEFAULT){
+        $permissions = [];
+        foreach($this->roles as $role){
+            if($role->can($permission_name, $permission_type)){
+                return true;
+            }
+        }
+        
+        return false;
     }
     
 }

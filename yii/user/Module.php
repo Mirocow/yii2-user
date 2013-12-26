@@ -4,6 +4,7 @@ namespace yii\user;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\user\models\Permission;
 
 /**
  * User module
@@ -214,11 +215,11 @@ class Module extends \yii\base\Module {
             ],
 
             "Confirm" => [
-                "url" => ["/{$this->id}/confirm?key=xxxxxxxxx"],
+                "url" => ["/{$this->id}/confirm?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
                 "description" => "Confirm email address. Automatically generated with key",
             ],
             "Reset" => [
-                "url" => ["/{$this->id}/reset?key=xxxxxxxxxx"],
+                "url" => ["/{$this->id}/reset?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
                 "description" => "Reset password. Automatically generated with key from 'Forgot password' page",
             ],
             

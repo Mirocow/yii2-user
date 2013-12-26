@@ -3,8 +3,15 @@ Yii2 User
 
 Yii2 User - User authentication module
 
-**STILL IN DEVELOPMENT. EXPECT CHANGES AND B0RKS**
+* Registation -
+* Authorization - 
+* Email Authorization -
+* Email Uniq Link Engine -
+* Session table
+* ACL - List of Permissions ()
 
-## Demo
+ACL
+===
 
-TODO
+    $isCanUserView = User::find(44)->can('view');
+    $isCurrentUserView = Yii::$app->user->can('view');

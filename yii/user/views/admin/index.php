@@ -63,7 +63,6 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['/user/admi
             /*
             'new_email:email',
             'password',
-            'auth_key',
             'update_time',
             'ban_time',
             'ban_reason',

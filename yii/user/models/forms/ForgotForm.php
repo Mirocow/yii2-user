@@ -89,7 +89,9 @@ class ForgotForm extends Model {
 
             // send email
             $subject = Yii::$app->id . " - Forgot password";
+            $from = isset(Yii::$app->params['adminEmail'])? Yii::$app->params['adminEmail']: 'admin@localhost';
             $mailer->compose('forgotPassword', compact("subject", "user", "session"))
+                ->setFrom($from)
                 ->setTo($user->email)
                 ->setSubject($subject)
                 ->send();

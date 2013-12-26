@@ -5,6 +5,8 @@ namespace yii\user\models;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\user\models\UserRole;
+use yii\user\models\Permission;
+use yii\user\models\PermissionRole;
 //use ReflectionClass;
 
 /**
@@ -14,7 +16,7 @@ use yii\user\models\UserRole;
  * @property string $name
  * @property string $create_time
  * @property string $update_time
- * @property int $can_admin
+ * @property int $grant
  *
  * @property User[] $users
  */
@@ -50,7 +52,7 @@ class Role extends ActiveRecord {
             [['name'], 'required'],
             [['machine_name'], 'required'],
             [['create_time', 'update_time'], 'safe'],
-            [['can_admin'], 'boolean'],
+            [['grant'], 'boolean'],
             [['name'], 'string', 'max' => 255]
         ];
     }
@@ -65,14 +67,23 @@ class Role extends ActiveRecord {
             'machine_name' => 'Machine name',
             'create_time' => 'Create Time',
             'update_time' => 'Update Time',
-            'can_admin' => 'Can Admin',
+            'grant' => 'All access',
         ];
     }
 
     /**
      * @return \yii\db\ActiveRelation
      */
-    public function getUsers() {
+    public function getPermissionRoles()
+    {
+        return $this->hasMany(PermissionRole::className(), ['role_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveRelation
+     */
+    public function getUserRoles()
+    {
         return $this->hasMany(UserRole::className(), ['role_id' => 'id']);
     }
 
@@ -108,4 +119,5 @@ class Role extends ActiveRecord {
 
         return $dropdown;
     }
+
 }

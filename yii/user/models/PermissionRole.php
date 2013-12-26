@@ -19,7 +19,7 @@ class PermissionRole extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'tbl_permission_role';
+        return '{{%permission_role}}';
     }
 
     /**

@@ -5,6 +5,7 @@ namespace yii\user\models;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\Security;
+use yii\user\models\User;
 
 /**
  * Session model
@@ -12,7 +13,7 @@ use yii\helpers\Security;
  * @property string $id
  * @property string $user_id
  * @property int $type
- * @property string $key
+ * @property string $sid
  * @property string $create_time
  * @property string $consume_time
  * @property string $expire_time
@@ -74,7 +75,8 @@ class Session extends ActiveRecord {
     /**
      * @return \yii\db\ActiveRelation
      */
-    public function getUser() {
+    public function getUser()
+    {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
@@ -158,20 +160,25 @@ class Session extends ActiveRecord {
     /**
      * Find a session object for confirming
      *
-     * @param string $key
+     * @param string $hash     
+     * @param string $sid
      * @param int|string $type
      * @return static
      */
     public static function findActiveByKey($hash, $sid, $type) {
-
+        
         return static::find()
-            ->getUser()
+            // TODO: 9 Исправить когда решится вопрос по https://github.com/yiisoft/yii2/issues/1628            
+            ->leftJoin('{{%user}}', '{{%user}}.id = `tbl_session`.user_id')
             ->where([                
                 "sid" => $sid,
                 "type" => $type,
                 "consume_time" => null,
             ])
-            ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
+            //->with('user')
+            //->getUser()
+            //->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
+            //->andWhere(User::tableName() . ".hash = '{$hash}'")            
             ->andWhere("{{%user}}.hash = '{$hash}'")
             ->one();
             

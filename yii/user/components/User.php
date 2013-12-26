@@ -74,8 +74,11 @@ class User extends \yii\web\User {
         $user = ($user !== false) ? $user : $this->getIdentity();
 
         // check role attribute
-        $roleAttribute = "can_{$permission}";
-        return ($user and $user->role->$roleAttribute);
+        //$roleAttribute = "can_{$permission}";
+        //return ($user and $user->role->$roleAttribute);
+        
+        return ($user and $user->can($permission));
+        
     }
 
     /**

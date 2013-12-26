@@ -370,10 +370,10 @@ class DefaultController extends Controller {
     /**
      * Reset password
      */
-    public function actionReset($sid, $key) {
+    public function actionReset($hash, $sid) {
 
         // check for success or invalid session
-        $session = Session::findActiveByKey($sid, $key, Session::TYPE_PASSWORD_RESET);
+        $session = Session::findActiveByKey($hash, $sid, Session::TYPE_PASSWORD_RESET);
         $success = Yii::$app->session->getFlash('Reset-success');
         $invalidKey = !$session;
         if ($success or $invalidKey) {
