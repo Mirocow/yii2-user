@@ -501,4 +501,15 @@ class User extends ActiveRecord implements IdentityInterface {
         return false;
     }
     
+    public function hasRole($role_name){
+        return UserRole::find()
+            //->with('role')
+            ->joinWith(['role'])
+            //->getRole()
+            ->where([
+                '{{%role}}.machine_name' => $role_name,
+            ])
+            ->one();
+    }
+    
 }

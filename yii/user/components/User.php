@@ -91,4 +91,9 @@ class User extends \yii\web\User {
     public function cant($permission, $user = false) {
         return !$this->can($permission, $user);
     }
+    
+    public function hasRole($role_name, $user = false){
+        $user = ($user !== false) ? $user : $this->getIdentity();
+        return ($user and $user->hasRole($role_name));
+    }
 }

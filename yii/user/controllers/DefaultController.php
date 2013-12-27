@@ -272,10 +272,12 @@ class DefaultController extends Controller {
      * Profile
      */
     public function actionProfile() {
+        
+        $profile = (object) [ 'formName' => function(){ return 'Хрен'; } ];
 
         // set up profile and attempt to load data from $_POST
         /** @var Profile $profile */
-        $profile = Yii::$app->user->identity->profile;
+        /*$profile = Yii::$app->user->identity->profile;
         if ($profile->load($_POST)) {
 
             // validate for ajax request
@@ -294,7 +296,7 @@ class DefaultController extends Controller {
                 Yii::$app->session->setFlash("Profile-success", true);
                 $this->refresh();
             }
-        }
+        }*/
 
         // render view
         return $this->render("profile", [

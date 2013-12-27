@@ -201,13 +201,19 @@ class Module extends \yii\base\Module {
             ],
             
             "Account" => ["/{$this->id}/account"],
-            "Profile" => ["/{$this->id}/profile"],
+
+            "Profile" => [
+                "url" => ["/{$this->id}/profile?type=xxxxxxxxx"],
+                "description" => "Profile by type",
+            ],            
+            
             "Forgot password" => ["/{$this->id}/forgot"],
+            
             "Admin" => ["/{$this->id}/admin"],
 
             "Resend" => [
                 "url" => ["/{$this->id}/resend"],
-                "description" => "Resend email change confirmation (NOT FOR REGISTRATION/EMAIL ACTIVATION)",
+                "description" => "Resend email change confirmation (NOT FOR REGISTRATION / EMAIL ACTIVATION)",
             ],
             "Cancel" => [
                 "url" => ["/{$this->id}/cancel"],

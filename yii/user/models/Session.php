@@ -170,15 +170,13 @@ class Session extends ActiveRecord {
         return static::find()
             // TODO: 9 Исправить когда решится вопрос по https://github.com/yiisoft/yii2/issues/1628            
             ->leftJoin('{{%user}}', '{{%user}}.id = `tbl_session`.user_id')
+            //->joinWith(['user'])
             ->where([                
                 "sid" => $sid,
                 "type" => $type,
                 "consume_time" => null,
             ])
-            //->with('user')
-            //->getUser()
-            //->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
-            //->andWhere(User::tableName() . ".hash = '{$hash}'")            
+            ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
             ->andWhere("{{%user}}.hash = '{$hash}'")
             ->one();
             
