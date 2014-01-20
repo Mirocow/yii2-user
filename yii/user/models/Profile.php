@@ -30,10 +30,10 @@ class Profile extends ActiveRecord {
      */
     public function rules() {
         return [
-//            [['user_id'], 'required'],
-//            [['user_id'], 'integer'],
-//            [['create_time', 'update_time'], 'safe'],
-//            [['full_name'], 'string', 'max' => 255]
+            [['user_id'], 'required'],
+            [['user_id'], 'integer'],
+            [['create_time', 'update_time'], 'safe'],
+            //[['full_name'], 'string', 'max' => 255]
         ];
     }
 

@@ -130,7 +130,7 @@ class DefaultController extends Controller {
         
         // Get extented models
         $models = $this->getExtentedModels();
-        
+                    
         if ($User->load($_POST)) {
 
             // validate for ajax request
@@ -138,11 +138,13 @@ class DefaultController extends Controller {
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 return ActiveForm::validate($User, $Profile);
-            }
+            }                       
 
             // validate for normal request
             if ($User->validate() and $Profile->validate()) {
 
+                $transaction = Yii::$app->db->beginTransaction();
+                
                 // perform registration
                 $User->register();
                 
@@ -152,10 +154,39 @@ class DefaultController extends Controller {
                 // attached user role                
                 $UserRole->register($User->id, Role::ROLE_USER);
                 
-                $this->_calcEmailOrLogin($User);
+                // Add main models                
+                $_POST[ self::getClassName($User) ] = $User->getAttributes();
+                $_POST[ self::getClassName($Profile) ] = $Profile->getAttributes();
+                $_POST[ self::getClassName($UserRole) ] = $UserRole->getAttributes();
+                
+                $validate = true;
+                
+                // Save extented models                
+                foreach($models as $model){
+                    $model->load($_POST);
+                    if(!$model->validate()){
+                        $validate = false;
+                        break;
+                    }
+                    $model->save(false);
+                    $_POST[ self::getClassName($model) ] = $model->getAttributes();                    
+                }
+                
+                if($validate){
+                
+                    $transaction->commit();
+                    
+                    $this->_calcEmailOrLogin($User);
 
-                // set flash
-                Yii::$app->session->setFlash("Register-success", $User->getDisplayName());
+                    // set flash
+                    Yii::$app->session->setFlash("Register-success", $User->getDisplayName());
+                    
+                    return $this->redirect(['index']);                             
+                
+                }
+                
+                $transaction->rollback();
+                
             }
         }
         
@@ -167,7 +198,7 @@ class DefaultController extends Controller {
                 'profile' => $Profile,
             ],
             $models
-        );
+        );        
 
         // render view
         return $this->render("register", $models);
@@ -423,5 +454,9 @@ class DefaultController extends Controller {
 
     protected static function ForgotForm($params = []){
         return new ForgotForm ($params);
-    }*/             
+    }*/
+    
+    private static function getClassName($class){
+        return join('', array_slice(explode('\\', get_class($class)), -1));
+    }             
 }

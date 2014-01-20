@@ -79,7 +79,7 @@ class User extends ActiveRecord implements IdentityInterface {
             
             // general email and username rules
             [['email', 'username'], 'string', 'max' => 255],
-            [['email', 'username'], 'unique'],
+            [['email'], 'unique'],
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
             
