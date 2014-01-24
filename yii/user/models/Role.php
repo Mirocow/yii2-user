@@ -95,6 +95,10 @@ class Role extends ActiveRecord {
             'timestamp' => [
                 'class' => 'yii\behaviors\AutoTimestamp',
                 'timestamp' => function() { return date("Y-m-d H:i:s"); },
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+                ],                 
             ],
         ];
     }

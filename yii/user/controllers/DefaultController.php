@@ -7,6 +7,8 @@ use yii\web\Controller;
 use yii\web\Response;
 use yii\web\AccessControl;
 use yii\widgets\ActiveForm;
+use yii\helpers\Html;
+
 use yii\user\models\User;
 use yii\user\models\UserRole;
 use yii\user\models\Profile;
@@ -136,8 +138,36 @@ class DefaultController extends Controller {
             // validate for ajax request
             $Profile->load($_POST);
             if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return ActiveForm::validate($User, $Profile);
+                Yii::$app->response->format = Response::FORMAT_JSON;                                
+                
+                $models = array_merge(
+                    [
+                        'role' => Role::find($role),
+                        'user_role' => $UserRole,
+                        'user' => $User,
+                        'profile' => $Profile,
+                    ],
+                    $models
+                );
+                
+                //return ActiveForm::validate( $User, $Profile );
+                $result = [];
+                
+                $validate = true;
+                
+                foreach ($models as $model) {
+                    $model->load($_POST);
+                    $model->validate(null);
+                    foreach ($model->getErrors() as $attribute => $errors) {
+                        $result[Html::getInputId($model, $attribute)] = $errors;
+                        $validate = false;
+                    }
+                }
+                
+                //Yii::$app->session->setFlash(self::className(), 'В процессе обработки формы возникла ошибка');
+                
+                return $result;                
+                
             }                       
 
             // validate for normal request
@@ -183,7 +213,11 @@ class DefaultController extends Controller {
                     
                     return $this->redirect(['index']);                             
                 
-                }
+                } else {
+                    
+                    Yii::$app->session->setFlash("Register-error");
+                    
+                }                
                 
                 $transaction->rollback();
                 
