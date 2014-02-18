@@ -4,6 +4,7 @@ namespace yii\user\models;
 
 use Yii;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\user\models\UserRole;
 use yii\user\models\Permission;
 use yii\user\models\PermissionRole;
@@ -123,5 +124,19 @@ class Role extends ActiveRecord {
 
         return $dropdown;
     }
+    
+    /**
+    * put your comment there...
+    * 
+    * @param boolean $selected - 
+    * @return []
+    */
+    public function getPermissions($selected = true){
+        $return = [];
+        
+        $return = ArrayHelper::map($return, 'id', 'name');
+        
+        return $return;
+    }    
 
 }

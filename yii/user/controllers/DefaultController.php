@@ -8,6 +8,8 @@ use yii\web\Response;
 use yii\web\AccessControl;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
+use yii\base\Model;
+use yii\base\Event;
 
 use yii\user\models\User;
 use yii\user\models\UserRole;
@@ -24,473 +26,527 @@ use yii\user\models\forms\ResetForm;
  */
 class DefaultController extends Controller {
 
-    /**
-     * @inheritdoc
-     */
-//    public $defaultAction = "profile";
+		const EVENT_REGISTER_SUCCESS = 'success';
 
-    /**
-     * @inheritdoc
-     */
-    public function behaviors() {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'actions' => ['index', 'confirm', 'captcha'],
-                        'allow' => true,
-                        'roles' => ['?', '@'],
-                    ],
-                    [
-                        'actions' => ['account', 'profile', 'resend', 'cancel', 'logout', 'captcha'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                    [
-                        'actions' => ['login', 'register', 'forgot', 'reset', 'captcha'],
-                        'allow' => true,
-                        'roles' => ['?', '*'],
-                    ],
-                ],
-            ],
-        ];
-    }
+		const EVENT_REGISTER_ERROR = 'error';
 
-    /**
-    * put your comment there...
-    * 
-    */
-    public function actions()
-    {
-            return [
-                    'captcha' => [
-                            'class' => 'yii\captcha\CaptchaAction',                            
-                    ],
-            ];
-    }    
-    
-    /**
-     * Display index
-     */
-    public function actionIndex() {
+		public $models = [];
 
-        // display debug page if YII_DEBUG is set
-        if (defined('YII_DEBUG')) {
-            $actions = Yii::$app->getModule("user")->getActions();
-            return $this->render('index', ["actions" => $actions]);
-        }
-        // redirect to login page if user is guest
-        elseif (Yii::$app->user->isGuest) {
-            return $this->redirect(["/user/login"]);
-        }
-        // redirect to account page if user is logged in
-        else {
-            return $this->redirect(["/user/account"]);
-        }
-    }
+		public $title = '';
 
-    /**
-     * Display login page and log user in
-     */
-    public function actionLogin() {
+		public function init(){
 
-        // load data from $_POST and attempt login
-        $model = new LoginForm();
-        //$model = self::getLoginForm();
-        if ($model->load($_POST) && $model->login(Yii::$app->getModule("user")->loginDuration)) {
-            return $this->goBack();
-        }
+				Event::on(self::className(), self::EVENT_REGISTER_SUCCESS, function ($event) {
+						$class = get_called_class();
+						if(method_exists($class, 'onRegister')){
+								return $this->onRegister(self::EVENT_REGISTER_SUCCESS);
+						}
+				});
 
-        // render view
-        return $this->render('login', [
-            'model' => $model,
-        ]);
-    }
+				Event::on(self::className(), self::EVENT_REGISTER_ERROR, function ($event) {
+						$class = get_called_class();
+						if(method_exists($class, 'onRegister')){
+								return $this->onRegister(self::EVENT_REGISTER_ERROR);
+						}
+				});
 
-    /**
-     * Log user out and redirect home
-     */
-    public function actionLogout() {
-        Yii::$app->user->logout();
-        return $this->goHome();
-    }
+		}
 
-    /**
-     * Display register page
-     */
-    public function actionRegister($role = Role::ROLE_USER) {
+		/**
+		 * @inheritdoc
+		 */
+		public function behaviors() {
+				return [
+						'access' => [
+								'class' => AccessControl::className(),
+								'rules' => [
+										[
+												'actions' => ['index', 'confirm', 'captcha'],
+												'allow' => true,
+												'roles' => ['?', '@'],
+										],
+										[
+												'actions' => ['account', 'profile', 'resend', 'cancel', 'logout', 'captcha'],
+												'allow' => true,
+												'roles' => ['@'],
+										],
+										[
+												'actions' => ['login', 'register', 'forgot', 'reset', 'captcha'],
+												'allow' => true,
+												'roles' => ['?', '*'],
+										],
+								],
+						],
+				];
+		}
 
-        /** @var User $user */
-        $User = $this->getUser(["scenario" => "register"]);        
-        
-        /** @var Profile $profile */
-        $Profile = $this->getProfile();
-        
-        /** @var UserRole $userRole */
-        $UserRole = new UserRole();
-        
-        // Get extented models
-        $models = $this->getExtentedModels();
-                    
-        if ($User->load($_POST)) {
+		/**
+		* put your comment there...
+		*
+		*/
+		public function actions()
+		{
+						return [
+										'captcha' => [
+														'class' => 'yii\captcha\CaptchaAction',
+										],
+						];
+		}
 
-            // validate for ajax request
-            $Profile->load($_POST);
-            if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;                                
-                
-                $models = array_merge(
-                    [
-                        'role' => Role::find($role),
-                        'user_role' => $UserRole,
-                        'user' => $User,
-                        'profile' => $Profile,
-                    ],
-                    $models
-                );
-                
-                //return ActiveForm::validate( $User, $Profile );
-                $result = [];
-                
-                $validate = true;
-                
-                foreach ($models as $model) {
-                    $model->load($_POST);
-                    $model->validate(null);
-                    foreach ($model->getErrors() as $attribute => $errors) {
-                        $result[Html::getInputId($model, $attribute)] = $errors;
-                        $validate = false;
-                    }
-                }
-                
-                //Yii::$app->session->setFlash(self::className(), 'В процессе обработки формы возникла ошибка');
-                
-                return $result;                
-                
-            }                       
+		/**
+		 * Display index
+		 */
+		public function actionIndex() {
 
-            // validate for normal request
-            if ($User->validate() and $Profile->validate()) {
+				// display debug page if YII_DEBUG is set
+				if (defined('YII_DEBUG')) {
+						$actions = Yii::$app->getModule("user")->getActions();
+						return $this->render('index', ["actions" => $actions]);
+				}
+				// redirect to login page if user is guest
+				elseif (Yii::$app->user->isGuest) {
+						return $this->redirect(["/user/login"]);
+				}
+				// redirect to account page if user is logged in
+				else {
+						return $this->redirect(["/user/profile"]);
+				}
+		}
 
-                $transaction = Yii::$app->db->beginTransaction();
-                
-                // perform registration
-                $User->register();
-                
-                // profile registration
-                $Profile->register($User->id);
-                
-                // attached user role                
-                $UserRole->register($User->id, Role::ROLE_USER);
-                
-                // Add main models                
-                $_POST[ self::getClassName($User) ] = $User->getAttributes();
-                $_POST[ self::getClassName($Profile) ] = $Profile->getAttributes();
-                $_POST[ self::getClassName($UserRole) ] = $UserRole->getAttributes();
-                
-                $validate = true;
-                
-                // Save extented models                
-                foreach($models as $model){
-                    $model->load($_POST);
-                    if(!$model->validate()){
-                        $validate = false;
-                        break;
-                    }
-                    $model->save(false);
-                    $_POST[ self::getClassName($model) ] = $model->getAttributes();                    
-                }
-                
-                if($validate){
-                
-                    $transaction->commit();
-                    
-                    $this->_calcEmailOrLogin($User);
+		/**
+		 * Display login page and log user in
+		 */
+		public function actionLogin() {
 
-                    // set flash
-                    Yii::$app->session->setFlash("Register-success", $User->getDisplayName());
-                    
-                    return $this->redirect(['index']);                             
-                
-                } else {
-                    
-                    Yii::$app->session->setFlash("Register-error");
-                    
-                }                
-                
-                $transaction->rollback();
-                
-            }
-        }
-        
-        $models = array_merge(
-            [
-                'role' => Role::find($role),
-                'user_role' => $UserRole,
-                'user' => $User,
-                'profile' => $Profile,
-            ],
-            $models
-        );        
+				$this->title = 'Вход';
 
-        // render view
-        return $this->render("register", $models);
-    }
+				// load data from $_POST and attempt login
+				$model = new LoginForm();
+				if ($model->load($_POST) && $model->login(Yii::$app->getModule("user")->loginDuration)) {
+						return $this->goBack();
+				}
 
-    /**
-     * Calculate whether we need to send confirmation email or log user in
-     *
-     * @param User $user
-     */
-    protected function _calcEmailOrLogin($user) {
+				// render view
+				return $this->render('login', [
+						'model' => $model,
+				]);
+		}
 
-        // determine session type to see if we need to send email
-        $sessionType = null;
-        if ($user->status == User::STATUS_INACTIVE) {
-            $sessionType = Session::TYPE_EMAIL_ACTIVATE;
-        }
-        elseif ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
-            $sessionType = Session::TYPE_EMAIL_CHANGE;
-        }
+		/**
+		 * Log user out and redirect home
+		 */
+		public function actionLogout() {
+				Yii::$app->user->logout();
+				return $this->goHome();
+		}
 
-        // generate session and send email
-        if ($sessionType !== null) {
-            $session = Session::generate($user->id, $sessionType);
-            $numSent = $user->sendEmailConfirmation($session);
-        }
-        // login user in automatically
-        else {
-            Yii::$app->user->login($user, Yii::$app->getModule("user")->loginDuration);
-        }
-    }
+		/**
+		 * Display register page
+		 */
+		public function actionRegister($role = Role::ROLE_USER) {
 
-    /**
-     * Confirm email
-     */
-    public function actionConfirm($hash = "", $sid = "") {
+				/** @var User $user */
+				$User = $this->getUser(["scenario" => "register"]);
 
-        // search for session
-        $session = Session::findActiveByKey($hash, $sid, [Session::TYPE_EMAIL_ACTIVATE, Session::TYPE_EMAIL_CHANGE]);
-        if ($session) {
+				/** @var Profile $profile */
+				$Profile = $this->getProfile();
 
-            // confirm user
-            /** @var User $user */
-            $user = User::find($session->user_id);
-            $user->confirm();
+				/** @var UserRole $userRole */
+				$UserRole = new UserRole();
 
-            // consume session
-            $session->consume();
+				// Get extented models
+				$this->models = $this->getExtentedModels();
 
-            // set flash and refresh
-            Yii::$app->session->setFlash("Confirm-success", $user->email);
-            $this->refresh();
-        }
+				if ($User->load($_POST)) {
 
-        // render view
-        return $this->render("confirm", [
-            "session" => $session,
-        ]);
+						// validate for ajax request
+						$Profile->load($_POST);
+						if (Yii::$app->request->isAjax) {
+								Yii::$app->response->format = Response::FORMAT_JSON;
 
-    }
+								 $this->models = array_merge(
+										[
+												'role' => Role::find($role),
+												'user_role' => $UserRole,
+												'user' => $User,
+												'profile' => $Profile,
+										],
+										 $this->models
+								);
 
-    /**
-     * Account
-     */
-    public function actionAccount() {
+								$result = [];
 
-        // set up user/profile and attempt to load data from $_POST
-        /** @var User $user */
-        $user = Yii::$app->user->identity;
-        $user->setScenario("account");
-        if ($user->load($_POST)) {
+								$validate = true;
 
-            // validate for ajax request
-            if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return ActiveForm::validate($user);
-            }
+								foreach ($this->models as $model) {
+										$model->load($_POST);
+										$model->validate(null);
+										foreach ($model->getErrors() as $attribute => $errors) {
+												$result[Html::getInputId($model, $attribute)] = $errors;
+												$validate = false;
+										}
+								}
 
-            // validate for normal request
-            if ($user->validate()) {
+								//Yii::$app->session->setFlash(self::className(), 'В процессе обработки формы возникла ошибка');
 
-                // generate session and send email if user changed his email
-                if (Yii::$app->getModule("user")->emailChangeConfirmation and $user->checkAndPrepareEmailChange()) {
-                    $session = Session::generate($user->id, Session::TYPE_EMAIL_CHANGE);
-                    $numSent = $user->sendEmailConfirmation($session);
-                }
+								return $result;
 
-                // save, set flash, and refresh page
-                $user->save(false);
-                Yii::$app->session->setFlash("Account-success", true);
-                $this->refresh();
-            }
-        }
+						}
 
-        // render view
-        return $this->render("account", [
-            'user' => $user,
-        ]);
-    }
+						// validate for normal request
+						if ($User->validate() && $Profile->validate()) {
 
-    /**
-     * Profile
-     */
-    public function actionProfile() {
-        
-        $profile = (object) [ 'formName' => function(){ return 'Хрен'; } ];
+								$transaction = Yii::$app->db->beginTransaction();
 
-        // set up profile and attempt to load data from $_POST
-        /** @var Profile $profile */
-        /*$profile = Yii::$app->user->identity->profile;
-        if ($profile->load($_POST)) {
+								// perform registration
+								$User->register();
+								$_POST[ self::getClassName($User) ] = $User->getAttributes();
 
-            // validate for ajax request
-            if (Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return ActiveForm::validate($profile);
-            }
+								// profile registration
+								$Profile->register($User->id);
+								$_POST[ self::getClassName($Profile) ] = $Profile->getAttributes();
 
-            // validate for normal request
-            if ($profile->validate()) {
+								// attached user role
+								$UserRole->register($User->id, Role::ROLE_USER);
+								$_POST[ self::getClassName($UserRole) ] = $UserRole->getAttributes();
 
-                // call something here if needed
+								$validate = true;
 
-                // save - pass false in so that we don't have to validate again
-                $profile->save(false);
-                Yii::$app->session->setFlash("Profile-success", true);
-                $this->refresh();
-            }
-        }*/
+								// Save extented models
+								foreach($this->models as $model){
+										$model->load($_POST);
 
-        // render view
-        return $this->render("profile", [
-            'profile' => $profile,
-        ]);
-    }
+										if(!$model->validate()){
+												$validate = false;
+												break;
+										}
 
-    /**
-     * Resend email change confirmation
-     */
-    public function actionResend() {
+										$model->save(false);
 
-        // attempt to find session and get user/profile to send confirmation email
-        $session = Session::findActiveByUser(Yii::$app->user->id, Session::TYPE_EMAIL_CHANGE);
-        if ($session) {
-            /** @var User $user */
-            $user = Yii::$app->user->identity;
-            $user->sendEmailConfirmation($session);
+										// Add extented models
+										$_POST[ self::getClassName($model) ] = $model->getAttributes();
+								}
 
-            // set flash message
-            Yii::$app->session->setFlash("Resend-success", true);
-        }
+								$this->models = array_merge(
+										[
+												'role' => Role::find($role),
+												'user_role' => $UserRole,
+												'user' => $User,
+												'profile' => $Profile,
+										],
+										 $this->models
+								);
 
-        // go to account page
-        return $this->redirect(["/user/account"]);
-    }
+								if($validate){
 
-    /**
-     * Cancel email change
-     */
-    public function actionCancel() {
+										$transaction->commit();
 
-        // attempt to find session
-        $session = Session::findActiveByUser(Yii::$app->user->id, Session::TYPE_EMAIL_CHANGE);
-        if ($session) {
+										$this->_calcEmailOrLogin($User);
 
-            // remove user.new_email
-            /** @var User $user */
-            $user = Yii::$app->user->identity;
-            $user->new_email = null;
-            $user->save(false);
+										// Event: Sucessfull
+										$this->trigger(self::EVENT_REGISTER_SUCCESS);
 
-            // delete session and set flash message
-            $session->expire();
-            Yii::$app->session->setFlash("Cancel-success", true);
-        }
+										return $this->redirect(['index']);
 
-        // go to account page
-        return $this->redirect(["/user/account"]);
-    }
+								} else {
 
-    /**
-     * Forgot password
-     */
-    public function actionForgot() {
+										// Event: Has errors
+										$this->trigger(self::EVENT_REGISTER_ERROR);
 
-        // attempt to load $_POST data, validate, and send email
-        $model = new ForgotForm();
-        //$model = self::getForgotForm();
-        if ($model->load($_POST) && $model->sendForgotEmail()) {
+								}
 
-            // set flash and refresh page
-            Yii::$app->session->setFlash('Forgot-success');
-            return $this->refresh();
-        }
+								$transaction->rollback();
 
-        // render view
-        return $this->render('forgot', [
-            'model' => $model,
-        ]);
-    }
+						}
+				}
 
-    /**
-     * Reset password
-     */
-    public function actionReset($hash, $sid) {
+				 $this->models = array_merge(
+						[
+								'role' => Role::find($role),
+								'user_role' => $UserRole,
+								'user' => $User,
+								'profile' => $Profile,
+						],
+						 $this->models
+				);
 
-        // check for success or invalid session
-        $session = Session::findActiveByKey($hash, $sid, Session::TYPE_PASSWORD_RESET);
-        $success = Yii::$app->session->getFlash('Reset-success');
-        $invalidKey = !$session;
-        if ($success or $invalidKey) {
+				// render view
+				return $this->render("register",  $this->models);
+		}
 
-            // render view with invalid flag
-            // using setFlash()/refresh() would cause an infinite loop
-            return $this->render('reset', compact("success", "invalidKey"));
-        }
+		/**
+		 * Calculate whether we need to send confirmation email or log user in
+		 *
+		 * @param User $user
+		 */
+		protected function _calcEmailOrLogin($user) {
 
-        // attempt to load $_POST data, validate, and reset user password
-        $model = new ResetForm(["session" => $session]);
-        //$model = self::getResetForm(["session" => $session]);
-        if ($model->load($_POST) && $model->resetPassword()) {
+				// determine session type to see if we need to send email
+				$sessionType = null;
+				if ($user->status == User::STATUS_INACTIVE) {
+						$sessionType = Session::TYPE_EMAIL_ACTIVATE;
+				}
+				elseif ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
+						$sessionType = Session::TYPE_EMAIL_CHANGE;
+				}
 
-            // set flash and refresh page
-            Yii::$app->session->setFlash('Reset-success');
-            return $this->refresh();
-        }
+				// generate session and send email
+				if ($sessionType !== null) {
+						$session = Session::generate($user->id, $sessionType);
+						$numSent = $user->sendEmailConfirmation($session);
+				}
+				// login user in automatically
+				else {
+						Yii::$app->user->login($user, Yii::$app->getModule("user")->loginDuration);
+				}
+		}
 
-        // render view
-        return $this->render('reset', [
-            'model' => $model,
-        ]);
-    }
-    
-    protected function getUser($params = []){
-        return new User ($params);
-    }
-    
-    protected function getProfile($params = []){
-        return new Profile ($params);
-    }
-    
-    protected function getExtentedModels(){
-        return [];
-    }
-            
-    /*protected static function LoginForm($params = []){
-        return new LoginForm ($params);
-    }
-    
-    protected static function getResetForm($params = []){
-        return new ResetForm ($params);
-    }
+		/**
+		 * Confirm email
+		 */
+		public function actionConfirm($hash = "", $sid = "") {
 
-    protected static function ForgotForm($params = []){
-        return new ForgotForm ($params);
-    }*/
-    
-    private static function getClassName($class){
-        return join('', array_slice(explode('\\', get_class($class)), -1));
-    }             
+				// search for session
+				$session = Session::findActiveByKey($hash, $sid, [Session::TYPE_EMAIL_ACTIVATE]);
+				if ($session) {
+
+						// confirm user
+						/** @var User $user */
+						$user = User::find($session->user_id);
+						$user->confirm();
+
+						// consume session
+						$session->consume();
+
+						// set flash and refresh
+						Yii::$app->session->setFlash("Confirm-success", $user->email);
+						Yii::$app->session->setFlash("Confirm-success-hash", $user->hash);
+						Yii::$app->session->setFlash("Confirm-success-sid", $session->sid);
+
+						$this->refresh();
+				}
+
+				// render view
+				return $this->render("confirm", [
+						'session' => $session,
+				]);
+
+		}
+
+		/**
+		 * Account
+		 */
+		public function actionAccount() {
+
+				// set up user/profile and attempt to load data from $_POST
+				/** @var User $user */
+				$user = Yii::$app->user->identity;
+				$user->setScenario("account");
+				if ($user->load($_POST)) {
+
+						// validate for ajax request
+						if (Yii::$app->request->isAjax) {
+								Yii::$app->response->format = Response::FORMAT_JSON;
+								return ActiveForm::validate($user);
+						}
+
+						// validate for normal request
+						if ($user->validate()) {
+
+								// generate session and send email if user changed his email
+								if (Yii::$app->getModule("user")->emailChangeConfirmation and $user->checkAndPrepareEmailChange()) {
+										$session = Session::generate($user->id, Session::TYPE_EMAIL_CHANGE);
+										$numSent = $user->sendEmailConfirmation($session);
+								}
+
+								// save, set flash, and refresh page
+								$user->save(false);
+								Yii::$app->session->setFlash("Account-success", true);
+								$this->refresh();
+						}
+				}
+
+				// render view
+				return $this->render("account", [
+						'user' => $user,
+				]);
+		}
+
+		/**
+		 * Profile
+		 */
+		public function actionProfile() {
+
+				$transaction = Yii::$app->db->beginTransaction();
+
+				 /** @var User $User */
+				$User = Yii::$app->user->identity;
+
+				// set up profile and attempt to load data from $_POST
+				/** @var Profile $profile */
+				$profile = $User->profile;
+
+				/** @var UserRole $UserRole */
+				$UserRoles = $User->user_roles;
+
+				if ($profile->load($_POST)) {
+
+						// validate for ajax request
+						if (Yii::$app->request->isAjax) {
+								Yii::$app->response->format = Response::FORMAT_JSON;
+								return ActiveForm::validate($profile);
+						}
+
+						// validate for normal request
+						if ($profile->validate()) {
+								// save - pass false in so that we don't have to validate again
+								$profile->save(false);
+								Yii::$app->session->setFlash("Profile-success", true);
+								$this->refresh();
+						}
+				}
+
+				// render view
+				return $this->render("profile", [
+						'profile' => $profile,
+						'user' => $user,
+				]);
+		}
+
+		/**
+		 * Resend email change confirmation
+		 */
+		public function actionResend() {
+
+				// attempt to find session and get user/profile to send confirmation email
+				$session = Session::findActiveByUser(Yii::$app->user->id, Session::TYPE_EMAIL_CHANGE);
+				if ($session) {
+						/** @var User $user */
+						$user = Yii::$app->user->identity;
+						$user->sendEmailConfirmation($session);
+
+						// set flash message
+						Yii::$app->session->setFlash("Resend-success", true);
+				}
+
+				// go to account page
+				return $this->redirect(["/user/account"]);
+		}
+
+		/**
+		 * Cancel email change
+		 */
+		public function actionCancel() {
+
+				// attempt to find session
+				$session = Session::findActiveByUser(Yii::$app->user->id, Session::TYPE_EMAIL_CHANGE);
+				if ($session) {
+
+						// remove user.new_email
+						/** @var User $user */
+						$user = Yii::$app->user->identity;
+						$user->new_email = null;
+						$user->save(false);
+
+						// delete session and set flash message
+						$session->expire();
+						Yii::$app->session->setFlash("Cancel-success", true);
+				}
+
+				// go to account page
+				return $this->redirect(["/user/account"]);
+		}
+
+		/**
+		 * Forgot password
+		 */
+		public function actionForgot() {
+
+				// attempt to load $_POST data, validate, and send email
+				$model = new ForgotForm();
+				//$model = self::getForgotForm();
+				if ($model->load($_POST) && $model->sendForgotEmail()) {
+
+						// set flash and refresh page
+						Yii::$app->session->setFlash('Forgot-success');
+						return $this->refresh();
+				}
+
+				// render view
+				return $this->render('forgot', [
+						'model' => $model,
+				]);
+		}
+
+		/**
+		 * Reset password
+		 */
+		public function actionReset($hash, $sid) {
+
+				// check for success or invalid session
+				$session = Session::findActiveByKey($hash, $sid, Session::TYPE_PASSWORD_RESET);
+				$success = Yii::$app->session->getFlash('Reset-success');
+				$invalidKey = !$session;
+				if ($success or $invalidKey) {
+
+						// render view with invalid flag
+						// using setFlash()/refresh() would cause an infinite loop
+						return $this->render('reset', compact("success", "invalidKey"));
+				}
+
+				// attempt to load $_POST data, validate, and reset user password
+				$model = new ResetForm(["session" => $session]);
+				//$model = self::getResetForm(["session" => $session]);
+				if ($model->load($_POST) && $model->resetPassword()) {
+
+						// set flash and refresh page
+						Yii::$app->session->setFlash('Reset-success');
+						return $this->refresh();
+				}
+
+				// render view
+				return $this->render('reset', [
+						'model' => $model,
+				]);
+		}
+
+		protected function getUser($params = []){
+				return new User ($params);
+		}
+
+		protected function getProfile($params = []){
+				return new Profile ($params);
+		}
+
+		protected function getExtentedModels(){
+				return [];
+		}
+
+		/*protected static function LoginForm($params = []){
+				return new LoginForm ($params);
+		}
+
+		protected static function getResetForm($params = []){
+				return new ResetForm ($params);
+		}
+
+		protected static function ForgotForm($params = []){
+				return new ForgotForm ($params);
+		}*/
+
+		private static function getClassName($class){
+				return join('', array_slice(explode('\\', get_class($class)), -1));
+		}
+
+		protected function onRegister($type){
+
+				switch($type){
+						case self::EVENT_REGISTER_SUCCESS;
+						break;
+
+						case self::EVENT_REGISTER_ERROR;
+						break;
+				}
+
+		}
 }

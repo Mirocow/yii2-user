@@ -18,7 +18,6 @@ use ReflectionClass;
  * @property int $role_id
  * @property string $email
  * @property string $new_email
- * @property string $username
  * @property string $password
  * @property int $status
  * @property string $auth_key
@@ -32,488 +31,488 @@ use ReflectionClass;
  */
 class User extends ActiveRecord implements IdentityInterface {
 
-    /**
-     * @var int Inactive status
-     */
-    const STATUS_INACTIVE = 'INACTIVE';
+		/**
+		 * @var int Inactive status
+		 */
+		const STATUS_INACTIVE = 'INACTIVE';
 
-    /**
-     * @var int Active status
-     */
-    const STATUS_ACTIVE = 'ACTIVE';
+		/**
+		 * @var int Active status
+		 */
+		const STATUS_ACTIVE = 'ACTIVE';
 
-    /**
-     * @var int Unconfirmed email status
-     */
-    const STATUS_UNCONFIRMED_EMAIL = 2;
+		/**
+		 * @var int Unconfirmed email status
+		 */
+		const STATUS_UNCONFIRMED_EMAIL = 2;
 
-    /**
-     * @var string New password - for registration and changing password
-     */
-    public $newPassword;
+		/**
+		 * @var string New password - for registration and changing password
+		 */
+		public $newPassword;
 
-    /**
-     * @var string Current password - for account page updates
-     */
-    public $currentPassword;
-    
-    public $verifyCode;
-    
-    /**
-     * @inheritdoc
-     */
-    public static function tableName() {
-        return '{{%user}}';
-    }
+		/**
+		 * @var string Current password - for account page updates
+		 */
+		public $currentPassword;
 
-    /**
-     * @inheritdoc
-     */
-    public function rules() {
+		public $verifyCode;
 
-        // set initial rules
-        $rules = [
-        
-            // Status
-            [['status'], 'string'],
-            
-            // general email and username rules
-            [['email', 'username'], 'string', 'max' => 255],
-            [['email'], 'unique'],
-            [['email', 'username'], 'filter', 'filter' => 'trim'],
-            [['email'], 'email'],
-            
-            //[['username'], 'match', 'pattern' => '/^[A-Za-z0-9_]+$/u', 'message' => "{attribute} can contain only letters, numbers, and '_'."],
-            
-            // captcha
-            /*['verifyCode', 'captcha', 'skipOnEmpty' => !in_array('register', 
-                \Yii::$app->getModule('user')->usedCaptcha), 
-                'captchaAction' => \Yii::$app->getModule('user')->pathCaptcha],*/
+		/**
+		 * @inheritdoc
+		 */
+		public static function tableName() {
+				return '{{%user}}';
+		}
 
-            // password rules
-            [['newPassword'], 'string', 'min' => 3],
-            [['newPassword'], 'filter', 'filter' => 'trim'],
-            [['newPassword'], 'required', 'on' => ['register']],
+		/**
+		 * @inheritdoc
+		 */
+		public function rules() {
 
-            // account page
-            [['currentPassword'], 'required', 'on' => ['account']],
-            [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
+				// set initial rules
+				$rules = [
 
-            // admin crud rules
-			//[['role_id', 'status'], 'required', 'on' => ['admin']],
-			//[['role_id', 'status'], 'integer', 'on' => ['admin']],
-            
-			[['ban_time'], 'integer', 'on' => ['admin']],
-			[['ban_reason'], 'string', 'max' => 255, 'on' => 'admin'],
-        ];
+						// Status
+						[['status'], 'string'],
 
-        // add required rules for email/username depending on module properties
-        $requireFields = ["requireEmail", "requireUsername"];
-        
-        foreach ($requireFields as $requireField) {
-            if (Yii::$app->getModule("user")->$requireField) {
-                $attribute = strtolower(substr($requireField, 7));
-                $rules[] = [$attribute, "required"];
-            }
-        }
+						// general email rule
+						[['email'], 'string', 'max' => 255],
+						[['email'], 'unique'],
+						[['email'], 'filter', 'filter' => 'trim'],
+						[['email'], 'email'],
 
-        return $rules;
-    }
+						// captcha
+						/*['verifyCode', 'captcha', 'skipOnEmpty' => !in_array('register',
+								\Yii::$app->getModule('user')->usedCaptcha),
+								'captchaAction' => \Yii::$app->getModule('user')->pathCaptcha],*/
 
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    /*public function getId0()
-    {
-        return $this->hasOne(UserRole::className(), ['role_id' => 'id']);
-    }*/
-    
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    /*public function getRole()
-    {
-        return $this->hasMany(UserRole::className(), ['user_id' => 'id'])
-            ->viaTable('tbl_user_role', ['user_id' => 'id']);
-    }*/
-    
-    public function getRoles()
-    {
-        return $this->hasMany(UserRole::className(), ['user_id' => 'id']);
-    }    
-    
-    /**
-     * Validate password
-     */
-    public function validateCurrentPassword() {
+						// password rules
+						[['newPassword'], 'string', 'min' => 3],
+						[['newPassword'], 'filter', 'filter' => 'trim'],
+						[['newPassword'], 'required', 'on' => ['register']],
 
-        // check password
-        if (!$this->verifyPassword($this->currentPassword)) {
-            $this->addError("currentPassword", "Current password incorrect");
-        }
-    }
+						// account page
+						[['currentPassword'], 'required', 'on' => ['account']],
+						[['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
 
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels() {
-        return [
-            'id' => 'ID',
-            //'role_id' => 'Role ID',
-            'email' => 'Email',
-            'new_email' => 'New Email',
-            'username' => 'Username',
-            'password' => 'Password',
-            'hash' => 'Hash (user key)',
-            'status' => 'Status',
-            //'auth_key' => 'Auth Key',
-            'ban_time' => 'Ban Time',
-            'ban_reason' => 'Ban Reason',
-            'create_time' => 'Create Time',
-            'update_time' => 'Update Time',
-            'verify_code' => 'Verification Code',
+						// admin crud rules
+						//[['role_id', 'status'], 'required', 'on' => ['admin']],
+						//[['role_id', 'status'], 'integer', 'on' => ['admin']],
 
-            // attributes in model
-            'newPassword' => ($this->isNewRecord) ? 'Password' : 'New Password',
-        ];
-    }
+						[['ban_time'], 'integer', 'on' => ['admin']],
+						[['ban_reason'], 'string', 'max' => 255, 'on' => 'admin'],
+				];
 
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    public function getSessions() {
-        return $this->hasMany(Session::className(), ['user_id' => 'id']);
-    }
+				// add required rules for email depending on module properties
+				$requireFields = ["requireEmail"];
 
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    /*
-    public function getProfiles() {
-        return $this->hasMany(Profile::className(), ['user_id' => 'id']);
-    }
-    */
+				foreach ($requireFields as $requireField) {
+						if (Yii::$app->getModule("user")->$requireField) {
+								$attribute = strtolower(substr($requireField, 7));
+								$rules[] = [$attribute, "required"];
+						}
+				}
 
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    public function getProfile() {
-        return $this->hasOne(Profile::className(), ['user_id' => 'id']);
-    }
+				return $rules;
+		}
 
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    /*public function getRole() {
-        return $this->hasOne(Role::className(), ['id' => 'role_id']);
-    }*/
+		/**
+		 * @return \yii\db\ActiveRelation
+		 */
+		/*public function getId0()
+		{
+				return $this->hasOne(UserRole::className(), ['role_id' => 'id']);
+		}*/
 
-    /**
-     * @inheritdoc
-     */
-    public function behaviors() {
-        return [
-            'timestamp' => [
-                'class' => 'yii\behaviors\AutoTimestamp',
-                'timestamp' => function() { return date("Y-m-d H:i:s"); },
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
-                    ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
-                ],                
-            ],
+		/**
+		 * @return \yii\db\ActiveRelation
+		 */
+		/*public function getRole()
+		{
+				return $this->hasMany(UserRole::className(), ['user_id' => 'id'])
+						->viaTable('tbl_user_role', ['user_id' => 'id']);
+		}*/
 
-        ];
-    }
+		public function getRoles()
+		{
+				return $this->hasMany(UserRole::className(), ['user_id' => 'id']);
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public static function findIdentity($id) {
-        return static::find($id);
-    }
+		/**
+		 * Validate password
+		 */
+		public function validateCurrentPassword() {
 
-    /**
-     * @inheritdoc
-     */
-    public function getId() {
-        return $this->id;
-    }
+				// check password
+				if (!$this->verifyPassword($this->currentPassword)) {
+						$this->addError("currentPassword", "Current password incorrect");
+				}
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public function getAuthKey() {
-        return $this->id;
-    }
+		/**
+		 * @inheritdoc
+		 */
+		public function attributeLabels() {
+				return [
+						'id' => 'ID',
+						//'role_id' => 'Role ID',
+						'email' => 'Email',
+						'new_email' => 'New Email',
+						'password' => 'Password',
+						'hash' => 'Hash (user key)',
+						'status' => 'Status',
+						//'auth_key' => 'Auth Key',
+						'ban_time' => 'Ban Time',
+						'ban_reason' => 'Ban Reason',
+						'create_time' => 'Create Time',
+						'update_time' => 'Update Time',
+						'verify_code' => 'Verification Code',
 
-    /**
-     * @inheritdoc
-     */
-    public function validateAuthKey($authKey) {
-        return $this->id === $authKey;
-    }
+						// attributes in model
+						'newPassword' => ($this->isNewRecord) ? 'Password' : 'New Password',
+				];
+		}
 
-    /**
-     * Get a clean display name for the user
-     *
-     * @var string $default
-     * @return string|int
-     */
-    public function getDisplayName($default = "") {
+		/**
+		 * @return \yii\db\ActiveRelation
+		 */
+		public function getProfile()
+		{
+				return $this->hasMany(Profile::className(), ['user_id' => 'id']);
+		}
 
-        // define possible names
-        $possibleNames = [
-            "username",
-            "email",
-            "id",
-        ];
+		/**
+		 * @return \yii\db\ActiveRelation
+		 */
+		public function getSessions()
+		{
+				return $this->hasMany(Session::className(), ['user_id' => 'id']);
+		}
 
-        // go through each and return if valid
-        foreach ($possibleNames as $possibleName) {
-            if (!empty($this->$possibleName)) {
-                return $this->$possibleName;
-            }
-        }
+		/**
+		 * @return \yii\db\ActiveRelation
+		 */
+		public function getUserRoles()
+		{
+				return $this->hasMany(UserRole::className(), ['user_id' => 'id']);
+		}
 
-        return $default;
-    }
+		/**
+		 * @inheritdoc
+		 */
+		public function behaviors() {
+				return [
+						'timestamp' => [
+								'class' => 'yii\behaviors\AutoTimestamp',
+								'timestamp' => function() { return date("Y-m-d H:i:s"); },
+								'attributes' => [
+										ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+										ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+								],
+						],
 
-    /**
-     * Send email confirmation to user
-     *
-     * @param Session $session
-     * @return int
-     */
-    public function sendEmailConfirmation($session) {
+				];
+		}
 
-        // modify view path to module views
-        /** @var Mailer $mailer */
-        $mailer = Yii::$app->mail;
-        $mailer->viewPath = Yii::$app->getModule("user")->emailViewPath;
+		/**
+		 * @inheritdoc
+		 */
+		public static function findIdentity($id) {
+				return static::find($id);
+		}
 
-        // send email
-        $user = $this;
-        //$profile = $user->profile;
-        $subject = Yii::$app->id . " - Email confirmation";
-        $from = isset(Yii::$app->params['adminEmail'])? Yii::$app->params['adminEmail']: 'admin@localhost';
-        return $mailer->compose('confirmEmail', compact("subject", "user", "profile", "session"))
-            ->setFrom($from)
-            ->setTo($user->email)
-            ->setSubject($subject)
-            ->send();
-    }
-    
-    public function beforeValidate(){
-        
-        if($this->getIsNewRecord()){
-            
-            // Automaticly generate a new password
-            if (!($this->newPassword && Yii::$app->getModule("user")->requirePassword)) {
-                $this->newPassword = self::randomPassword(Yii::$app->getModule("user")->passwordLength);
-            }
-            
-            // Status is inactive for default
-            if(Yii::$app->getModule("user")->userReristerActive){
-                $this->status = self::STATUS_ACTIVE;
-            } else {                
-                $this->status = self::STATUS_INACTIVE;
-            }
-            
-        }
-        
-        return parent::beforeValidate();
-    }
+		/**
+		 * @inheritdoc
+		 */
+		public function getId() {
+				return $this->id;
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public function beforeSave($insert) {
+		/**
+		 * @inheritdoc
+		 */
+		public function getAuthKey() {
+				return $this->id;
+		}
 
-        // hash new password if set
-        if ($this->newPassword) {            
-            $this->encryptNewPassword();
-        }
+		/**
+		 * @inheritdoc
+		 */
+		public function validateAuthKey($authKey) {
+				return $this->id === $authKey;
+		}
 
-        // ensure fields are null so they won't get set as empty string
-        $nullAttributes = ["email", "username", "ban_time", "ban_reason"];
-        foreach ($nullAttributes as $nullAttribute) {
-            $this->$nullAttribute = $this->$nullAttribute ? $this->$nullAttribute : null;
-        }
+		/**
+		 * Get a clean display name for the user
+		 *
+		 * @var string $default
+		 * @return string|int
+		 */
+		public function getDisplayName($default = "") {
 
-        // convert ban_time checkbox to date
-        if ($this->ban_time) {
-            $this->ban_time = date("Y-m-d H:i:s");
-        }
-        
-        // set User inactive
-        if($this->getIsNewRecord()){
-            $this->status = User::STATUS_INACTIVE;
-            $this->hash = md5($this->password . time());
-        }       
+				// define possible names
+				$possibleNames = [
+						"email",
+						"id",
+				];
 
-        return parent::beforeSave($insert);
-    }
+				// go through each and return if valid
+				foreach ($possibleNames as $possibleName) {
+						if (!empty($this->$possibleName)) {
+								return $this->$possibleName;
+						}
+				}
 
-    /**
-     * Encrypt newPassword into password
-     *
-     * @return static
-     */
-    public function encryptNewPassword() {
-        $this->password = Security::generatePasswordHash($this->newPassword);
-        return $this;
-    }
+				return $default;
+		}
 
-    /**
-     * Validate password
-     *
-     * @param string $password
-     * @return bool
-     */
-    public function verifyPassword($password) {
-        return Security::validatePassword($password, $this->password);
-    }
+		/**
+		 * Send email confirmation to user
+		 *
+		 * @param Session $session
+		 * @return int
+		 */
+		public function sendEmailConfirmation($session) {
 
-    /**
-     * Register a new user
-     *
-     * @param int $roleId
-     * @return static
-     */
-    public function register() {
+				// modify view path to module views
+				/** @var Mailer $mailer */
+				$mailer = Yii::$app->mail;
+				$mailer->viewPath = Yii::$app->getModule("user")->emailViewPath;
 
-        // set default attributes for registration
-        $attributes = [ "status" => static::STATUS_ACTIVE ];
+				// send email
+				$user = $this;
+				//$profile = $user->profile;
+				$subject = Yii::$app->id . " - Email confirmation";
+				$from = isset(Yii::$app->params['adminEmail'])? Yii::$app->params['adminEmail']: 'admin@localhost';
+				return $mailer->compose('confirmEmail', compact("subject", "user", "profile", "session"))
+						->setFrom($from)
+						->setTo($user->email)
+						->setSubject($subject)
+						->send();
+		}
 
-        // determine if we need to change status based on module properties
-        $emailConfirmation = Yii::$app->getModule("user")->emailConfirmation;
+		public function beforeValidate(){
 
-        // set inactive if email is required
-        if (Yii::$app->getModule("user")->requireEmail and $emailConfirmation) {
-            $attributes["status"] = User::STATUS_INACTIVE;
-        }
-        // set unconfirmed if email is set but NOT required
-        elseif (Yii::$app->getModule("user")->useEmail and $this->email and $emailConfirmation) {
-            $attributes["status"] = User::STATUS_UNCONFIRMED_EMAIL;
-        }
+				if($this->getIsNewRecord()){
 
-        // set attributes
-        $this->setAttributes($attributes, false);
+						// Automaticly generate a new password
+						if (!($this->newPassword && Yii::$app->getModule("user")->requirePassword)) {
+								$this->newPassword = self::randomPassword(Yii::$app->getModule("user")->passwordLength);
+						}
 
-        // save and return
-        // note: we assume that we have already validated (both $user and $profile)
-        $this->save(false);
-        return $this;
-    }
+						// Status is inactive for default
+						if(Yii::$app->getModule("user")->userReristerActive){
+								$this->status = self::STATUS_ACTIVE;
+						} else {
+								$this->status = self::STATUS_INACTIVE;
+						}
 
-    /**
-     * Check and prepare for email change
-     *
-     * @return bool
-     */
-    public function checkAndPrepareEmailChange() {
+				}
 
-        // check for change in email
-        if ($this->email != $this->getOldAttribute("email")) {
+				return parent::beforeValidate();
+		}
 
-            // change status
-            $this->status = static::STATUS_UNCONFIRMED_EMAIL;
+		/**
+		 * @inheritdoc
+		 */
+		public function beforeSave($insert) {
 
-            // set new_email attribute and restore old one
-            $this->new_email = $this->email;
-            $this->email = $this->getOldAttribute("email");
+				// hash new password if set
+				if ($this->newPassword) {
+						$this->encryptNewPassword();
+				}
 
-            return true;
-        }
+				// ensure fields are null so they won't get set as empty string
+				$nullAttributes = ["email", "ban_time", "ban_reason"];
+				foreach ($nullAttributes as $nullAttribute) {
+						$this->$nullAttribute = $this->$nullAttribute ? $this->$nullAttribute : null;
+				}
 
-        return false;
-    }
+				// convert ban_time checkbox to date
+				if ($this->ban_time) {
+						$this->ban_time = date("Y-m-d H:i:s");
+				}
 
-    /**
-     * Confirm user email
-     *
-     * @return static
-     */
-    public function confirm() {
+				// set User inactive
+				if($this->getIsNewRecord()){
+						$this->status = User::STATUS_INACTIVE;
+						$this->hash = md5($this->password . time());
+				}
 
-        // update status
-        $this->status = static::STATUS_ACTIVE;
+				return parent::beforeSave($insert);
+		}
 
-        // update new_email if set
-        if ($this->new_email) {
-            $this->email = $this->new_email;
-            $this->new_email = null;
-        }
+		/**
+		 * Encrypt newPassword into password
+		 *
+		 * @return static
+		 */
+		public function encryptNewPassword() {
+				$this->password = Security::generatePasswordHash($this->newPassword);
+				return $this;
+		}
 
-        // save and return
-        $this->save();
-        return $this;
-    }
+		/**
+		 * Validate password
+		 *
+		 * @param string $password
+		 * @return bool
+		 */
+		public function verifyPassword($password) {
+				return Security::validatePassword($password, $this->password);
+		}
 
-    /**
-     * Get list of statuses for creating dropdowns
-     *
-     * @return array
-     */
-    public static function statusDropdown() {
+		/**
+		 * Register a new user
+		 *
+		 * @param int $roleId
+		 * @return static
+		 */
+		public function register() {
 
-        // get data if needed
-        static $dropdown;
-        if ($dropdown === null) {
+				// set default attributes for registration
+				$attributes = [ "status" => static::STATUS_ACTIVE ];
 
-            // create a reflection class to get constants
-            $refl = new ReflectionClass(get_called_class());
-            $constants = $refl->getConstants();
+				// determine if we need to change status based on module properties
+				$emailConfirmation = Yii::$app->getModule("user")->emailConfirmation;
 
-            // check for status constants (e.g., STATUS_ACTIVE)
-            foreach ($constants as $constantName => $constantValue) {
+				// set inactive if email is required
+				if (Yii::$app->getModule("user")->requireEmail and $emailConfirmation) {
+						$attributes["status"] = User::STATUS_INACTIVE;
+				}
+				// set unconfirmed if email is set but NOT required
+				elseif (Yii::$app->getModule("user")->useEmail and $this->email and $emailConfirmation) {
+						$attributes["status"] = User::STATUS_UNCONFIRMED_EMAIL;
+				}
 
-                // add prettified name to dropdown
-                if (strpos($constantName, "STATUS_") === 0) {
-                    $prettyName = str_replace("STATUS_", "", $constantName);
-                    $prettyName = Inflector::humanize(strtolower($prettyName));
-                    $dropdown[$constantValue] = $prettyName;
-                }
-            }
-        }
+				// set attributes
+				$this->setAttributes($attributes, false);
 
-        return $dropdown;
-    }
-    
-    public static function randomPassword($password_length = 8, $strong = false){        
-        $alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
-        if($strong){
-            $alphabet .= '~!@#$%^&*()_+';
-        }
-        $pass = array(); //remember to declare $pass as an array
-        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
-        for ($i = 0; $i < $password_length; $i++) {
-            $n = rand(0, $alphaLength);
-            $pass[] = $alphabet[$n];
-        }
-        return implode($pass); //turn the array into a string
-    }
-    
-    public function can($permission_name, $permission_type = Permission::PERMISSION_DEFAULT){
-        $permissions = [];
-        foreach($this->roles as $role){
-            if($role->can($permission_name, $permission_type)){
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    public function hasRole($role_name){
-        return UserRole::find()
-            //->with('role')
-            ->joinWith(['role'])
-            //->getRole()
-            ->where([
-                '{{%role}}.machine_name' => $role_name,
-            ])
-            ->one();
-    }
-    
+				// save and return
+				// note: we assume that we have already validated (both $user and $profile)
+				$this->save(false);
+				return $this;
+		}
+
+		/**
+		 * Check and prepare for email change
+		 *
+		 * @return bool
+		 */
+		public function checkAndPrepareEmailChange() {
+
+				// check for change in email
+				if ($this->email != $this->getOldAttribute("email")) {
+
+						// change status
+						$this->status = static::STATUS_UNCONFIRMED_EMAIL;
+
+						// set new_email attribute and restore old one
+						$this->new_email = $this->email;
+						$this->email = $this->getOldAttribute("email");
+
+						return true;
+				}
+
+				return false;
+		}
+
+		/**
+		 * Confirm user email
+		 *
+		 * @return static
+		 */
+		public function confirm() {
+
+				// update status
+				$this->status = static::STATUS_ACTIVE;
+
+				// update new_email if set
+				if ($this->new_email) {
+						$this->email = $this->new_email;
+						$this->new_email = null;
+				}
+
+				// save and return
+				$this->save();
+				return $this;
+		}
+
+		/**
+		 * Get list of statuses for creating dropdowns
+		 *
+		 * @return array
+		 */
+		public static function statusDropdown() {
+
+				// get data if needed
+				static $dropdown;
+				if ($dropdown === null) {
+
+						// create a reflection class to get constants
+						$refl = new ReflectionClass(get_called_class());
+						$constants = $refl->getConstants();
+
+						// check for status constants (e.g., STATUS_ACTIVE)
+						foreach ($constants as $constantName => $constantValue) {
+
+								// add prettified name to dropdown
+								if (strpos($constantName, "STATUS_") === 0) {
+										$prettyName = str_replace("STATUS_", "", $constantName);
+										$prettyName = Inflector::humanize(strtolower($prettyName));
+										$dropdown[$constantValue] = $prettyName;
+								}
+						}
+				}
+
+				return $dropdown;
+		}
+
+		public static function randomPassword($password_length = 8, $strong = false){
+				$alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
+				if($strong){
+						$alphabet .= '~!@#$%^&*()_+';
+				}
+				$pass = array(); //remember to declare $pass as an array
+				$alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+				for ($i = 0; $i < $password_length; $i++) {
+						$n = rand(0, $alphaLength);
+						$pass[] = $alphabet[$n];
+				}
+				return implode($pass); //turn the array into a string
+		}
+
+		public function can($permission_name, $permission_type = Permission::PERMISSION_DEFAULT){
+				$permissions = [];
+				foreach($this->roles as $role){
+						if($role->can($permission_name, $permission_type)){
+								return true;
+						}
+				}
+
+				return false;
+		}
+
+		public function hasRole($role_name){
+				return UserRole::find()
+						//->with('role')
+						->joinWith(['role'])
+						//->getRole()
+						->where([
+								'{{%user_role}}.user_id' => $this->id,
+								'{{%role}}.machine_name' => $role_name,
+						])
+						->one();
+		}
+
+		public function getUsername(){
+			if($profile = $this->profile){
+				$profile = reset($profile);
+				return $profile->username;
+			} else {
+				return '';
+			}
+		}
+
 }

@@ -174,10 +174,10 @@ class Session extends ActiveRecord {
             ->where([                
                 "sid" => $sid,
                 "type" => $type,
-                "consume_time" => null,
+                //"consume_time" => null,
             ])
             ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
-            ->andWhere("{{%user}}.hash = '{$hash}'")
+            ->andWhere("{{%user}}.hash = :hash", [':hash' => $hash])
             ->one();
             
     }
@@ -190,6 +190,7 @@ class Session extends ActiveRecord {
     public function consume() {
         
         $this->consume_time = date("Y-m-d H:i:s");
+        $this->type = self::TYPE_PASSWORD_RESET;
         $this->save(false);
         return $this;
         
