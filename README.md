@@ -1,6 +1,9 @@
 Yii2 User
 =========
 
+http://images.mirocow.com/2014-02-19_03.24.42_rca639xskb.png
+http://images.mirocow.com/2014-02-19_03.26.29_kufjlm2776.png
+
 Yii2 User - User authentication module
 
 * Registation -
