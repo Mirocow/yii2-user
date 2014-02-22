@@ -157,22 +157,23 @@ class DefaultController extends Controller {
 				// Get extented models
 				$this->models = $this->getExtentedModels();
 
+				$this->models = array_merge(
+					[
+							'role' => Role::find($role),
+							'user_role' => $UserRole,
+							'user' => $User,
+							'profile' => $Profile,
+					],
+					$this->models
+				);
+
 				if ($User->load($_POST)) {
 
-						// validate for ajax request
 						$Profile->load($_POST);
+
+						// validate for ajax request
 						if (Yii::$app->request->isAjax) {
 								Yii::$app->response->format = Response::FORMAT_JSON;
-
-								 $this->models = array_merge(
-										[
-												'role' => Role::find($role),
-												'user_role' => $UserRole,
-												'user' => $User,
-												'profile' => $Profile,
-										],
-										 $this->models
-								);
 
 								$result = [];
 
@@ -194,7 +195,7 @@ class DefaultController extends Controller {
 						}
 
 						// validate for normal request
-						if ($User->validate() && $Profile->validate()) {
+						if ($User->validate()) {
 
 								$transaction = Yii::$app->db->beginTransaction();
 
@@ -259,16 +260,6 @@ class DefaultController extends Controller {
 
 						}
 				}
-
-				 $this->models = array_merge(
-						[
-								'role' => Role::find($role),
-								'user_role' => $UserRole,
-								'user' => $User,
-								'profile' => $Profile,
-						],
-						 $this->models
-				);
 
 				// render view
 				return $this->render("register",  $this->models);
