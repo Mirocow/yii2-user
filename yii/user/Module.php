@@ -170,65 +170,57 @@ class Module extends \yii\base\Module {
 
 				return [
 						"User" => [
-								'url' => ["/{$this->id}"],
+								'url' => [""],
 								"description" => "",
 						],
 
 						"Login" => [
-								'url' => ["/{$this->id}/login"],
+								'url' => ["login"],
 								'description' => '',
 						],
 
-						"Logout" => ["/{$this->id}/logout"],
+						"Logout" => ["logout"],
+
+						"Account" => ["account"],
 
 						"Register" => [
-								"url" => ["/{$this->id}/register&type=xxxxx"],
+								"url" => ["register", "type" => "xxxxxxxx"],
 								"description" => "Регистрация пользователя с указанием типа",
 						],
 
 						"Profile" => [
-								"url" => ["/{$this->id}/profile?type=xxxxxxxxx"],
+								"url" => ["profile", "type" => "xxxxxxxxx"],
 								"description" => "Profile by type",
 						],
 
-						"Forgot password" => ["/{$this->id}/forgot"],
+						"Forgot password" => ["forgot"],
 
 						"Resend" => [
-								"url" => ["/{$this->id}/resend"],
+								"url" => ["resend"],
 								"description" => "Resend email change confirmation (NOT FOR REGISTRATION / EMAIL ACTIVATION)",
 						],
 						"Cancel" => [
-								"url" => ["/{$this->id}/cancel"],
+								"url" => ["cancel"],
 								"description" => "Cancel email change confirmation. <br/>This and resend appear on the 'Account' page",
 						],
 
 						"Confirm" => [
-								"url" => ["/{$this->id}/confirm?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
+								"url" => ["confirm", "hash" => "xxxxxxxxx", "sid" => "xxxxxxxxxx"],
 								"description" => "Confirm email address. Automatically generated with key",
 						],
 						"Reset" => [
-								"url" => ["/{$this->id}/reset?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
+								"url" => ["reset", "hash" => "xxxxxxxxx", "sid" => "xxxxxxxxxx"],
 								"description" => "Reset password. Automatically generated with key from 'Forgot password' page",
 						],
 
-						'captcha' => [
+						/*'captcha' => [
 										'url' => ['yii\captcha\CaptchaAction'],
 										"description" => "Path for captcha generate",
-						],
+						],*/
 
-						'admin/user' => [
-										'url' => ['/user/admin/user'],
-										"description" => "User Control Manager",
-						],
-
-						'admin/role' => [
-										'url' => ['/user/admin/role'],
-										"description" => "Role Based Access Control Manager",
-						],
-
-						'admin/permission' => [
-										'url' => ['/user/admin/permission'],
-										"description" => "Permissions and access control interface",
+						'user/admin' => [
+										'url' => ["/{$this->id}/admin"],
+										"description" => "Administrate interface",
 						],
 				];
 		}

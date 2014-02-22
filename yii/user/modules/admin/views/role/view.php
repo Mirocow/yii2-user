@@ -9,6 +9,7 @@ use yii\widgets\DetailView;
  */
 
 $this->title = $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = ['label' => 'Roles', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

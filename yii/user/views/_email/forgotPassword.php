@@ -14,4 +14,4 @@ use yii\user\models\Session;
 
 <p>Please use this link to reset your password:</p>
 
-<p><?= Yii::$app->urlManager->createAbsoluteUrl(["user/reset", "hash" => $user->hash, "sid" => $session->sid]); ?></p>
+<p><?= $this->createAbsoluteUrl(["reset", "hash" => $user->hash, "sid" => $session->sid]); ?></p>

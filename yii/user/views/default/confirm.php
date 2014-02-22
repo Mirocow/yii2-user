@@ -21,12 +21,12 @@ $this->title = $success ? "Confirmed" : "Error";
 
 						<?php if (Yii::$app->user->isLoggedIn): ?>
 
-								<p><?= Html::a("Go to my account", ["/user/account"]) ?></p>
+								<p><?= Html::a("Go to my account", ["account"]) ?></p>
 								<p><?= Html::a("Go home", Yii::$app->getHomeUrl()) ?></p>
 
 						<?php else: ?>
 
-								 <p><?= Html::a("Log in here", ["/user/reset", "hash" => $hash, "sid" => $sid]) ?></p>
+								 <p><?= Html::a("Log in here", ["reset", "hash" => $hash, "sid" => $sid]) ?></p>
 
 						<?php endif; ?>
 

@@ -10,6 +10,7 @@ use yii\grid\GridView;
  */
 
 $this->title = 'Roles';
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="role-index">
@@ -32,14 +33,14 @@ $this->params['breadcrumbs'][] = $this->title;
 			'machine_name',
 			'name',
 			'description',
-			'grant:boolean',            
+			'grant:boolean',
 			// 'create_time',
 			// 'update_time',
 
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{update} {delete}',
-            ],
+						[
+								'class' => 'yii\grid\ActionColumn',
+								'template' => '{update} {delete}',
+						],
 		],
 	]); ?>
 

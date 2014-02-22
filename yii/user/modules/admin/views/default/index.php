@@ -5,6 +5,7 @@ use yii\helpers\Html;
  * @var array $actions
  */
 $this->title = "User";
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

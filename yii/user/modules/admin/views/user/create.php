@@ -8,6 +8,7 @@ use yii\helpers\Html;
  */
 
 $this->title = 'Create User';
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

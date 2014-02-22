@@ -9,6 +9,7 @@ use yii\widgets\DetailView;
  */
 
 $this->title = $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -30,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 		'attributes' => [
 			'id',
 			'username',
-			'phone',
+			//'phone',
 			'status',
 			'email:email',
 			'new_email:email',

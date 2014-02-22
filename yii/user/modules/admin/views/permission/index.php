@@ -10,6 +10,7 @@ use yii\grid\GridView;
  */
 
 $this->title = 'Permissions';
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="permission-index">

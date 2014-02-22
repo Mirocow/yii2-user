@@ -12,6 +12,7 @@ use yii\user\models\User;
  */
 
 $this->title = 'Users';
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-index">
@@ -53,18 +54,18 @@ $this->params['breadcrumbs'][] = $this->title;
 			// 'data:ntext',
 
 			[
-								'class' => 'yii\grid\ActionColumn',
-								'template' => '{update} {delete}',
-								'buttons' => ['delete' => function ($url, $model) {
-										if($model->id > 1){
-												return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-														'title' => Yii::t('yii', 'Delete'),
-														'data-confirm' => Yii::t('yii', 'Are you sure to delete this item?'),
-														'data-method' => 'post',
-												]);
-										}
-						}],
-						],
+				'class' => 'yii\grid\ActionColumn',
+				'template' => '{update} {delete}',
+				'buttons' => ['delete' => function ($url, $model) {
+						if($model->id > 1){
+								return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
+										'title' => Yii::t('yii', 'Delete'),
+										'data-confirm' => Yii::t('yii', 'Are you sure to delete this item?'),
+										'data-method' => 'post',
+								]);
+						}
+				}],
+			],
 		],
 	]); ?>
 

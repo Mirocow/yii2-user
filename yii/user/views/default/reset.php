@@ -16,38 +16,38 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="site-reset">
 	<h1><?= Html::encode($this->title) ?></h1>
 
-    <?php if (!empty($success)): ?>
+		<?php if (!empty($success)): ?>
 
-        <div class="alert alert-success">
+				<div class="alert alert-success">
 
-            <p>Password reset</p>
+						<p>Password reset</p>
 
-            <p><?= Html::a("Log in here", ["/user/login"]) ?></p>
+						<p><?= Html::a("Log in here", ["login"]) ?></p>
 
-        </div>
+				</div>
 
-    <?php elseif (!empty($invalidKey)): ?>
+		<?php elseif (!empty($invalidKey)): ?>
 
-        <div class="alert alert-danger">Invalid key</div>
+				<div class="alert alert-danger">Invalid key</div>
 
 	<?php else: ?>
 
-        <div class="row">
-            <div class="col-lg-5">
-                <?php $form = ActiveForm::begin(['id' => 'reset-form']); ?>
+				<div class="row">
+						<div class="col-lg-5">
+								<?php $form = ActiveForm::begin(['id' => 'reset-form']); ?>
 
-                    <?php /*
-                    <?= $form->field($model, 'email') ?>
-                    */ ?>
+										<?php /*
+										<?= $form->field($model, 'email') ?>
+										*/ ?>
 
-                    <?= $form->field($model, 'newPassword')->passwordInput() ?>
-                    <?= $form->field($model, 'newPasswordConfirm')->passwordInput() ?>
-                    <div class="form-group">
-                        <?= Html::submitButton('Reset', ['class' => 'btn btn-primary']) ?>
-                    </div>
-                <?php ActiveForm::end(); ?>
-            </div>
-        </div>
+										<?= $form->field($model, 'newPassword')->passwordInput() ?>
+										<?= $form->field($model, 'newPasswordConfirm')->passwordInput() ?>
+										<div class="form-group">
+												<?= Html::submitButton('Reset', ['class' => 'btn btn-primary']) ?>
+										</div>
+								<?php ActiveForm::end(); ?>
+						</div>
+				</div>
 
 	<?php endif; ?>
 </div>

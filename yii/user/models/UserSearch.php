@@ -13,7 +13,6 @@ class UserSearch extends Model
 {
 	public $id;
 	public $username;
-	public $phone;
 	public $status;
 	public $email;
 	public $new_email;
@@ -29,7 +28,7 @@ class UserSearch extends Model
 	{
 		return [
 			[['id'], 'integer'],
-			[['username', 'phone', 'status', 'email', 'new_email', 'password', 'hash', 'ban_time', 'ban_reason', 'create_time', 'update_time', 'data'], 'safe'],
+			[['username', 'status', 'email', 'new_email', 'password', 'hash', 'ban_time', 'ban_reason', 'create_time', 'update_time', 'data'], 'safe'],
 		];
 	}
 
@@ -41,7 +40,6 @@ class UserSearch extends Model
 		return [
 			'id' => 'ID',
 			'username' => 'Контактное лицо',
-			'phone' => 'Контактный телефон',
 			'status' => 'Статус',
 			'email' => 'Контактный email',
 			'new_email' => 'New Email',
@@ -68,7 +66,6 @@ class UserSearch extends Model
 
 		$this->addCondition($query, 'id');
 		$this->addCondition($query, 'username', true);
-		$this->addCondition($query, 'phone', true);
 		$this->addCondition($query, 'status', true);
 		$this->addCondition($query, 'email', true);
 		$this->addCondition($query, 'new_email', true);

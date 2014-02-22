@@ -16,7 +16,6 @@ use yii\db\Expression;
  * @property string $update_time
  * @property string $username
  * @property string $phone
- *
  * @property User $user
  */
 class Profile extends ActiveRecord {

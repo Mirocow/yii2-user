@@ -13,4 +13,28 @@ class Module extends \yii\base\Module
 
 		// custom initialization code goes here
 	}
+
+		/**
+		 * Get a list of actions for this module. Used for debugging/initial installations
+		 */
+		public function getActions() {
+
+				return [
+						'user' => [
+										'url' => ["/user/admin/user"],
+										"description" => "User Control Manager",
+						],
+
+						'role' => [
+										'url' => ["/user/admin/role"],
+										"description" => "Role Based Access Control Manager",
+						],
+
+						'permission' => [
+										'url' => ["/user/admin/permission"],
+										"description" => "Permissions and access control interface",
+						],
+				];
+		}
+
 }

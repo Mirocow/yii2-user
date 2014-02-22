@@ -8,6 +8,7 @@ use yii\helpers\Html;
  */
 
 $this->title = 'Update Permission: ' . $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = ['label' => 'Permissions', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Update';

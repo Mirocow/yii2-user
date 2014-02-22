@@ -105,11 +105,11 @@ class DefaultController extends Controller {
 				}
 				// redirect to login page if user is guest
 				elseif (Yii::$app->user->isGuest) {
-						return $this->redirect(["/user/login"]);
+						return $this->redirect(["login"]);
 				}
 				// redirect to account page if user is logged in
 				else {
-						return $this->redirect(["/user/profile"]);
+						return $this->redirect(["profile"]);
 				}
 		}
 
@@ -370,15 +370,16 @@ class DefaultController extends Controller {
 
 				$transaction = Yii::$app->db->beginTransaction();
 
-				 /** @var User $User */
-				$User = Yii::$app->user->identity;
+				 /** @var User $user */
+				$user = Yii::$app->user->identity;
 
 				// set up profile and attempt to load data from $_POST
+				$profiles = $user->profile;
 				/** @var Profile $profile */
-				$profile = $User->profile;
+				$profile = reset($profiles);
 
-				/** @var UserRole $UserRole */
-				$UserRoles = $User->user_roles;
+				/** @var UserRole $roles */
+				$roles = $user->userRoles;
 
 				if ($profile->load($_POST)) {
 
@@ -401,6 +402,7 @@ class DefaultController extends Controller {
 				return $this->render("profile", [
 						'profile' => $profile,
 						'user' => $user,
+						'roles' => $roles
 				]);
 		}
 
@@ -421,7 +423,7 @@ class DefaultController extends Controller {
 				}
 
 				// go to account page
-				return $this->redirect(["/user/account"]);
+				return $this->redirect(["account"]);
 		}
 
 		/**
@@ -445,7 +447,7 @@ class DefaultController extends Controller {
 				}
 
 				// go to account page
-				return $this->redirect(["/user/account"]);
+				return $this->redirect(["account"]);
 		}
 
 		/**
