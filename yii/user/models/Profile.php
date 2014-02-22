@@ -4,6 +4,8 @@ namespace yii\user\models;
 
 use Yii;
 use yii\db\ActiveRecord;
+use yii\behaviors\TimestampBehavior;
+use yii\db\Expression;
 
 /**
  * Profile model
@@ -78,12 +80,12 @@ class Profile extends ActiveRecord {
 		public function behaviors() {
 				return [
 						'timestamp' => [
-								'class' => 'yii\behaviors\AutoTimestamp',
-								'timestamp' => function() { return date("Y-m-d H:i:s"); },
+								'class' => TimestampBehavior::className(),
 								'attributes' => [
 										ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
 										ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
 								],
+								'value' => new Expression('NOW()'),
 						],
 				];
 		}

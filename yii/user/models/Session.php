@@ -6,6 +6,8 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\Security;
 use yii\user\models\User;
+use yii\behaviors\TimestampBehavior;
+use yii\db\Expression;
 
 /**
  * Session model
@@ -22,190 +24,190 @@ use yii\user\models\User;
  */
 class Session extends ActiveRecord {
 
-    /**
-     * @var int Key for email activations (=registering)
-     */
-    const TYPE_EMAIL_ACTIVATE = 'EMAIL_ACTIVATE';
+		/**
+		 * @var int Key for email activations (=registering)
+		 */
+		const TYPE_EMAIL_ACTIVATE = 'EMAIL_ACTIVATE';
 
-    /**
-     * @var int Key for email changes (=updating account page)
-     */
-    const TYPE_EMAIL_CHANGE = 'EMAIL_CHANGE';
+		/**
+		 * @var int Key for email changes (=updating account page)
+		 */
+		const TYPE_EMAIL_CHANGE = 'EMAIL_CHANGE';
 
-    /**
-     * @var int Key for password resets
-     */
-    const TYPE_PASSWORD_RESET = 'PASSWORD_RESET';
+		/**
+		 * @var int Key for password resets
+		 */
+		const TYPE_PASSWORD_RESET = 'PASSWORD_RESET';
 
-    /**
-     * @inheritdoc
-     */
-    public static function tableName() {
-        return '{{%session}}';
-    }
+		/**
+		 * @inheritdoc
+		 */
+		public static function tableName() {
+				return '{{%session}}';
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public function rules() {
-        return [
-            [['user_id', 'type', 'sid'], 'required'],
-            [['user_id'], 'integer'],
-            [['type'], 'string'],
-            [['create_time', 'consume_time', 'expire_time'], 'safe'],
-            [['sid'], 'string', 'max' => 255]
-        ];
-    }
+		/**
+		 * @inheritdoc
+		 */
+		public function rules() {
+				return [
+						[['user_id', 'type', 'sid'], 'required'],
+						[['user_id'], 'integer'],
+						[['type'], 'string'],
+						[['create_time', 'consume_time', 'expire_time'], 'safe'],
+						[['sid'], 'string', 'max' => 255]
+				];
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels() {
-        return [
-            'id' => 'ID',
-            'user_id' => 'User ID',
-            'type' => 'Type',
-            'sid' => 'User SID Key',
-            'create_time' => 'Create Time',
-            'consume_time' => 'Consume Time',
-            'expire_time' => 'Expire Time',
-        ];
-    }
+		/**
+		 * @inheritdoc
+		 */
+		public function attributeLabels() {
+				return [
+						'id' => 'ID',
+						'user_id' => 'User ID',
+						'type' => 'Type',
+						'sid' => 'User SID Key',
+						'create_time' => 'Create Time',
+						'consume_time' => 'Consume Time',
+						'expire_time' => 'Expire Time',
+				];
+		}
 
-    /**
-     * @return \yii\db\ActiveRelation
-     */
-    public function getUser()
-    {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
-    }
+		/**
+		 * @return \yii\db\ActiveRelation
+		 */
+		public function getUser()
+		{
+				return $this->hasOne(User::className(), ['id' => 'user_id']);
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public function behaviors() {
-        return [
-            'timestamp' => [
-                'class' => 'yii\behaviors\AutoTimestamp',
-                'attributes' => [
-                    // set only create_time because there is no update_time
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['create_time'],
-                ],
-                'timestamp' => function() { return date("Y-m-d H:i:s"); },
-            ],
-        ];
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public function beforeSave($insert) {
-        $this->ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
-        $this->user_agent = Yii::$app->getRequest()->getUserAgent();
-        return parent::beforeSave($insert);
-    }    
+		/**
+		 * @inheritdoc
+		 */
+		public function behaviors() {
+				return [
+						'timestamp' => [
+								'class' => TimestampBehavior::className(),
+								'attributes' => [
+										ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+										//ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+								],
+								'value' => new Expression('NOW()'),
+						],
+				];
+		}
 
-    /**
-     * Generate and return a new session
-     *
-     * @param int $userId
-     * @param int $type
-     * @param string $expireTime
-     * @return static
-     */
-    public static function generate($userId, $type, $expireTime = null) {
+		/**
+		 * @inheritdoc
+		 */
+		public function beforeSave($insert) {
+				$this->ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+				$this->user_agent = Yii::$app->getRequest()->getUserAgent();
+				return parent::beforeSave($insert);
+		}
 
-        // attempt to find existing record
-        // otherwise create new record
-        $model = static::findActiveByUser($userId, $type);
-        if (!$model) {
-            $model = new static();
-        }
+		/**
+		 * Generate and return a new session
+		 *
+		 * @param int $userId
+		 * @param int $type
+		 * @param string $expireTime
+		 * @return static
+		 */
+		public static function generate($userId, $type, $expireTime = null) {
 
-        // set/update data
-        $model->user_id = $userId;
-        $model->type = $type;
-        $model->create_time = date("Y-m-d H:i:s");
-        $model->expire_time = $expireTime;
-        $model->sid = Security::generateRandomKey();
-        $model->save();
-        
-        if($model->hasErrors()){
-            throw new HttpException(500, 'Can`t create session.');
-        }
+				// attempt to find existing record
+				// otherwise create new record
+				$model = static::findActiveByUser($userId, $type);
+				if (!$model) {
+						$model = new static();
+				}
 
-        return $model;
-    }
+				// set/update data
+				$model->user_id = $userId;
+				$model->type = $type;
+				$model->create_time = date("Y-m-d H:i:s");
+				$model->expire_time = $expireTime;
+				$model->sid = Security::generateRandomKey();
+				$model->save();
 
-    /**
-     * Find an active session
-     *
-     * @param int $userId
-     * @param int $type
-     * @return static
-     */
-    public static function findActiveByUser($userId, $type) {
-        
-        return static::find()
-            ->where([
-                "user_id" => $userId,
-                "type" => $type,
-                "consume_time" => null,
-            ])
-            ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
-            ->one();
-            
-    }
+				if($model->hasErrors()){
+						throw new HttpException(500, 'Can`t create session.');
+				}
 
-    /**
-     * Find a session object for confirming
-     *
-     * @param string $hash     
-     * @param string $sid
-     * @param int|string $type
-     * @return static
-     */
-    public static function findActiveByKey($hash, $sid, $type) {
-        
-        return static::find()
-            // TODO: 9 Исправить когда решится вопрос по https://github.com/yiisoft/yii2/issues/1628            
-            ->leftJoin('{{%user}}', '{{%user}}.id = `tbl_session`.user_id')
-            //->joinWith(['user'])
-            ->where([                
-                "sid" => $sid,
-                "type" => $type,
-                //"consume_time" => null,
-            ])
-            ->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
-            ->andWhere("{{%user}}.hash = :hash", [':hash' => $hash])
-            ->one();
-            
-    }
+				return $model;
+		}
 
-    /**
-     * Consume session record
-     *
-     * @return static
-     */
-    public function consume() {
-        
-        $this->consume_time = date("Y-m-d H:i:s");
-        $this->type = self::TYPE_PASSWORD_RESET;
-        $this->save(false);
-        return $this;
-        
-    }
+		/**
+		 * Find an active session
+		 *
+		 * @param int $userId
+		 * @param int $type
+		 * @return static
+		 */
+		public static function findActiveByUser($userId, $type) {
 
-    /**
-     * Expire session record
-     *
-     * @return static
-     */
-    public function expire() {
-        
-        $this->expire_time = date("Y-m-d H:i:s");
-        $this->save(false);
-        return $this;
-        
-    }
+				return static::find()
+						->where([
+								"user_id" => $userId,
+								"type" => $type,
+								"consume_time" => null,
+						])
+						->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
+						->one();
+
+		}
+
+		/**
+		 * Find a session object for confirming
+		 *
+		 * @param string $hash
+		 * @param string $sid
+		 * @param int|string $type
+		 * @return static
+		 */
+		public static function findActiveByKey($hash, $sid, $type) {
+
+				return static::find()
+						// TODO: 9 Исправить когда решится вопрос по https://github.com/yiisoft/yii2/issues/1628
+						->leftJoin('{{%user}}', '{{%user}}.id = `tbl_session`.user_id')
+						//->joinWith(['user'])
+						->where([
+								"sid" => $sid,
+								"type" => $type,
+								//"consume_time" => null,
+						])
+						->andWhere("([[expire_time]] >= NOW() or [[expire_time]] is NULL)")
+						->andWhere("{{%user}}.hash = :hash", [':hash' => $hash])
+						->one();
+
+		}
+
+		/**
+		 * Consume session record
+		 *
+		 * @return static
+		 */
+		public function consume() {
+
+				$this->consume_time = date("Y-m-d H:i:s");
+				$this->type = self::TYPE_PASSWORD_RESET;
+				$this->save(false);
+				return $this;
+
+		}
+
+		/**
+		 * Expire session record
+		 *
+		 * @return static
+		 */
+		public function expire() {
+
+				$this->expire_time = date("Y-m-d H:i:s");
+				$this->save(false);
+				return $this;
+
+		}
 }
