@@ -26,6 +26,7 @@ Route
 Actions in this module
 Note: some actions may be unavailable depending on if you are logged in/out, or as an admin/regular user
 
+<code>
 Link	Description
 User	 URL: /user
 Login	 URL: /user/login
@@ -52,3 +53,4 @@ admin/role	 URL: /user/admin/role
 Role Based Access Control Manager
 admin/permission	 URL: /user/admin/permission
 Permissions and access control interface
+</code>
