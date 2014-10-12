@@ -5,12 +5,12 @@ use yii\widgets\ActiveForm;
 
 /**
  * @var yii\web\View $this
- * @var app\modules\core\models\RoleSearch $model
+ * @var yii\user\models\search\UserSearch $model
  * @var yii\widgets\ActiveForm $form
  */
 ?>
 
-<div class="role-search">
+<div class="user-search">
 
 	<?php $form = ActiveForm::begin([
 		'action' => ['index'],
@@ -19,17 +19,25 @@ use yii\widgets\ActiveForm;
 
 		<?= $form->field($model, 'id') ?>
 
-		<?= $form->field($model, 'machine_name') ?>
+		<?= $form->field($model, 'role_id') ?>
 
-		<?= $form->field($model, 'name') ?>
+		<?= $form->field($model, 'email') ?>
 
-		<?= $form->field($model, 'description') ?>
+		<?= $form->field($model, 'new_email') ?>
 
-		<?= $form->field($model, 'grant')->checkbox() ?>
+		<?= $form->field($model, 'username') ?>
+
+		<?php // echo $form->field($model, 'password') ?>
+
+		<?php // echo $form->field($model, 'status') ?>
 
 		<?php // echo $form->field($model, 'create_time') ?>
 
 		<?php // echo $form->field($model, 'update_time') ?>
+
+		<?php // echo $form->field($model, 'ban_time') ?>
+
+		<?php // echo $form->field($model, 'ban_reason') ?>
 
 		<div class="form-group">
 			<?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

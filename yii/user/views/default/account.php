@@ -14,69 +14,69 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="site-account">
 	<h1><?= Html::encode($this->title) ?></h1>
 
-		<?php if (Yii::$app->session->getFlash("Account-success")): ?>
+    <?php if (Yii::$app->session->getFlash("Account-success")): ?>
 
-				<div class="alert alert-success">Account updated</div>
+        <div class="alert alert-success">Account updated</div>
 
-		<?php elseif (Yii::$app->session->getFlash("Resend-success")): ?>
+    <?php elseif (Yii::$app->session->getFlash("Resend-success")): ?>
 
-				<div class="alert alert-success">Confirmation email resent</div>
+        <div class="alert alert-success">Confirmation email resent</div>
 
-		<?php elseif (Yii::$app->session->getFlash("Cancel-success")): ?>
+    <?php elseif (Yii::$app->session->getFlash("Cancel-success")): ?>
 
-				<div class="alert alert-success">Email change cancelled</div>
+        <div class="alert alert-success">Email change cancelled</div>
 
-		<?php endif; ?>
+    <?php endif; ?>
 
-		<?php $form = ActiveForm::begin([
-				'id' => 'account-form',
-				'options' => ['class' => 'form-horizontal'],
-				'fieldConfig' => [
-						'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-7\">{error}</div>",
-						'labelOptions' => ['class' => 'col-lg-2 control-label'],
-				],
-				'enableAjaxValidation' => true,
-		]); ?>
+    <?php $form = ActiveForm::begin([
+        'id' => 'account-form',
+        'options' => ['class' => 'form-horizontal'],
+        'fieldConfig' => [
+            'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-7\">{error}</div>",
+            'labelOptions' => ['class' => 'col-lg-2 control-label'],
+        ],
+        'enableAjaxValidation' => true,
+    ]); ?>
 
-		<?= $form->field($user, 'currentPassword')->passwordInput() ?>
+    <?= $form->field($user, 'currentPassword')->passwordInput() ?>
 
-		<hr/>
+    <hr/>
 
-		<?php if (Yii::$app->getModule("user")->useEmail): ?>
-				<?= $form->field($user, 'email') ?>
-		<?php endif; ?>
+    <?php if (Yii::$app->getModule("user")->useEmail): ?>
+        <?= $form->field($user, 'email') ?>
+    <?php endif; ?>
 
-		<div class="form-group">
-				<div class="col-lg-offset-2 col-lg-10">
+    <div class="form-group">
+        <div class="col-lg-offset-2 col-lg-10">
 
-						<?php if ($user->new_email): ?>
+            <?php if ($user->new_email): ?>
 
-								<p class="small">Pending email confirmation: [ <?= $user->new_email ?> ]</p>
-								<p class="small">
-										<?= Html::a("resend", ["resend"]) ?> or <?= Html::a("cancel", ["cancel"]) ?>
-								</p>
+                <p class="small">Pending email confirmation: [ <?= $user->new_email ?> ]</p>
+                <p class="small">
+                    <?= Html::a("resend", ["/user/resend"]) ?> or <?= Html::a("cancel", ["/user/cancel"]) ?>
+                </p>
 
-						<?php elseif (Yii::$app->getModule("user")->emailConfirmation): ?>
+            <?php elseif (Yii::$app->getModule("user")->emailConfirmation): ?>
 
-								<p class="small">Changing your email requires email confirmation</p>
+                <p class="small">Changing your email requires email confirmation</p>
 
-						<?php endif; ?>
+            <?php endif; ?>
 
-				</div>
-		</div>
+        </div>
+    </div>
 
-		<?php if (Yii::$app->getModule("user")->useUsername): ?>
-				<?= $form->field($user, 'username') ?>
-		<?php endif; ?>
+    <?php if (Yii::$app->getModule("user")->useUsername): ?>
+        <?= $form->field($user, 'username') ?>
+    <?php endif; ?>
 
-		<?= $form->field($user, 'newPassword')->passwordInput() ?>
+    <?= $form->field($user, 'newPassword')->passwordInput() ?>
 
-		<div class="form-group">
-				<div class="col-lg-offset-2 col-lg-10">
-						<?= Html::submitButton('Update', ['class' => 'btn btn-primary']) ?>
-				</div>
-		</div>
+    <div class="form-group">
+        <div class="col-lg-offset-2 col-lg-10">
+            <?= Html::submitButton('Update', ['class' => 'btn btn-primary']) ?>
+        </div>
+    </div>
 
-		<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 
 </div>

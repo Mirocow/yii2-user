@@ -5,15 +5,14 @@ use yii\widgets\DetailView;
 
 /**
  * @var yii\web\View $this
- * @var app\modules\core\models\Role $model
+ * @var yii\user\models\User $model
  */
 
-$this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
-$this->params['breadcrumbs'][] = ['label' => 'Roles', 'url' => ['index']];
+$this->title = $model->id;
+$this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="role-view">
+<div class="user-view">
 
 	<h1><?= Html::encode($this->title) ?></h1>
 
@@ -26,16 +25,24 @@ $this->params['breadcrumbs'][] = $this->title;
 		]); ?>
 	</p>
 
+    <?php
+        $attributes = $model->getAttributes();
+        $attributes["full_name"] = $model->profile->full_name;
+    ?>
 	<?php echo DetailView::widget([
-		'model' => $model,
+		'model' => $attributes,
 		'attributes' => [
 			'id',
-			'machine_name',
-			'name',
-			'description',
-			'grant:boolean',
-			'create_time',
-			'update_time',
+			//'role_id',
+			'email:email',
+			'new_email:email',
+			'username',
+            //'full_name',
+			'status',
+			//'create_time',
+			//'update_time',
+			'ban_time',
+			'ban_reason',
 		],
 	]); ?>
 

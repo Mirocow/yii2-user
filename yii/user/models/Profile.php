@@ -2,10 +2,8 @@
 
 namespace yii\user\models;
 
-use Yii;
+use yii;
 use yii\db\ActiveRecord;
-use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
 
 /**
  * Profile model
@@ -14,104 +12,90 @@ use yii\db\Expression;
  * @property int $user_id
  * @property string $create_time
  * @property string $update_time
- * @property string $username
- * @property string $phone
+ * @property string $full_name
+ *
  * @property User $user
  */
 class Profile extends ActiveRecord {
 
-		/**
-		 * @inheritdoc
-		 */
-		public static function tableName() {
-				return '{{%profile}}';
-		}
+    /**
+     * @inheritdoc
+     */
+    public static function tableName() {
+        return '{{%profile}}';
+    }
 
-		/**
-		 * @inheritdoc
-		 */
-		public function rules() {
-				$rules = [
-						[['user_id'], 'required'],
-						[['user_id'], 'integer'],
-						[['username', 'phone'], 'string', 'max' => 255],
-						[['username'], 'match', 'pattern' => '/^[A-Za-z0-9_]+$/u', 'message' => "{attribute} can contain only letters, numbers, and '_'."],
-						[['create_time', 'update_time'], 'safe'],
-				];
+    /**
+     * @inheritdoc
+     */
+    public function rules() {
+        return [
+            [['user_id'], 'required'],
+            [['user_id'], 'integer'],
+            [['create_time', 'update_time'], 'safe'],
+            //[['full_name'], 'string', 'max' => 255]
+        ];
+    }
 
-				// add required rules for username depending on module properties
-				$requireFields = ["requireUsername"];
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels() {
+        return [
+            'id' => 'ID',
+            'user_id' => 'User ID',
+            'create_time' => 'Create Time',
+            'update_time' => 'Update Time',
+            'full_name' => 'Full Name',
+        ];
+    }
 
-				foreach ($requireFields as $requireField) {
-						if (Yii::$app->getModule("user")->$requireField) {
-								$attribute = strtolower(substr($requireField, 7));
-								$rules[] = [$attribute, "required"];
-						}
-				}
+    /**
+     * @return \yii\db\ActiveRelation
+     */
+    public function getUser() {
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
 
-				return $rules;
-		}
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\AutoTimestamp',
+                'timestamp' => function() { return date("Y-m-d H:i:s"); },
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+                ],                 
+            ],
+        ];
+    }
 
-		/**
-		 * @inheritdoc
-		 */
-		public function attributeLabels() {
-				return [
-						'id' => 'ID',
-						'user_id' => 'User ID',
-						'create_time' => 'Create Time',
-						'update_time' => 'Update Time',
-						'username' => 'User name',
-						'phone' => 'Phone number',
-				];
-		}
+    /**
+     * Register a new profile for user
+     *
+     * @param int $userId
+     * @return static
+     */
+    public function register($userId) {
+        
+        $this->user_id = $userId;
+        $this->save(false);
+        return $this;
+        
+    }
 
-		/**
-		 * @return \yii\db\ActiveRelation
-		 */
-		public function getUser() {
-				return $this->hasOne(User::className(), ['id' => 'user_id']);
-		}
+    /**
+     * Set user id for profile
+     *
+     * @param int $userId
+     * @return static
+     */
+    public function setUser($userId) {
 
-		/**
-		 * @inheritdoc
-		 */
-		public function behaviors() {
-				return [
-						'timestamp' => [
-								'class' => TimestampBehavior::className(),
-								'attributes' => [
-										ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
-										ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
-								],
-								'value' => new Expression('NOW()'),
-						],
-				];
-		}
-
-		/**
-		 * Register a new profile for user
-		 *
-		 * @param int $userId
-		 * @return static
-		 */
-		public function register($userId) {
-
-				$this->user_id = $userId;
-				$this->save(false);
-				return $this;
-
-		}
-
-		/**
-		 * Set user id for profile
-		 *
-		 * @param int $userId
-		 * @return static
-		 */
-		public function setUser($userId) {
-
-				$this->user_id = $userId;
-				return $this;
-		}
+        $this->user_id = $userId;
+        return $this;
+    }
 }

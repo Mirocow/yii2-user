@@ -2,7 +2,7 @@
 
 namespace yii\user\models\forms;
 
-use Yii;
+use yii;
 use yii\base\Model;
 use yii\swiftmailer\Mailer;
 use yii\user\models\User;

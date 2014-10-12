@@ -33,14 +33,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
 	<div class="form-group">
 		<div class="col-lg-offset-2 col-lg-10">
-			<?= Html::submitButton('Login', ['class' => 'btn btn-primary']) ?> or <?= Html::a("register", ["register"])?>
+			<?= Html::submitButton('Login', ['class' => 'btn btn-primary']) ?> or <?= Html::a("register", ["/user/register"])?>
 		</div>
 	</div>
 
 	<?php ActiveForm::end(); ?>
 
 	<div class="col-lg-offset-2" style="color:#999;">
-		You may login with <strong>admin/pass</strong>.<br>
-		To modify the username/password, log in first and then go <?= HTML::a("update your profile", ["profile"]) ?>.
+		You may login with <strong>neo/neo</strong>.<br>
+		To modify the username/password, log in first and then go <?= HTML::a("update your profile", ["/user/profile"]) ?>.
 	</div>
 </div>

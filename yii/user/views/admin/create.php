@@ -4,11 +4,11 @@ use yii\helpers\Html;
 
 /**
  * @var yii\web\View $this
- * @var app\modules\core\models\User $model
+ * @var yii\user\models\User $user
+ * @var yii\user\models\Profile $profile
  */
 
 $this->title = 'Create User';
-$this->params['breadcrumbs'][] = ['label' => 'admin', 'url' => ['/user/admin']];
 $this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -17,7 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
 	<h1><?= Html::encode($this->title) ?></h1>
 
 	<?php echo $this->render('_form', [
-		'model' => $model,
+		'user' => $user,
+        'profile' => $profile,
 	]); ?>
 
 </div>
