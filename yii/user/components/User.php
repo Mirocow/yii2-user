@@ -25,6 +25,11 @@ class User extends \yii\web\User {
     public $loginUrl = ["/user/login"];
 
     /**
+     * @inheritdoc
+     */
+    public $emailViewPath = '@user/views/mail';
+
+    /**
      * Check if user is logged in
      *
      * @return bool

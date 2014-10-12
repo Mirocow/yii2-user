@@ -90,7 +90,7 @@ class LoginForm extends Model {
         // check for inactive status
         if ($user->status == User::STATUS_INACTIVE) {
             $session = Session::generate($user->id, Session::TYPE_EMAIL_ACTIVATE);
-            $user->sendEmailConfirmation($session);
+            $user->sendEmailConfirmation($session, '', 'confirmEmail');
             $this->addError("username", "Email confirmation resent");
         }
     }
