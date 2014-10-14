@@ -60,6 +60,8 @@ class User extends ActiveRecord implements IdentityInterface {
     
     public $verifyCode;
     
+    public $default_roles = [0];
+    
     /**
      * @inheritdoc
      */
@@ -498,7 +500,15 @@ class User extends ActiveRecord implements IdentityInterface {
     
     public function can($permission_name, $permission_type = Permission::PERMISSION_DEFAULT){
         $permissions = [];
-        foreach($this->roles as $role){
+        
+        $roles = $this->roles;
+        
+        if(!$roles){
+          foreach($this->default_roles as $role_id){
+            $roles[] = UserRole::find()->where(['role_id' => $role_id])->one();
+          }
+        }
+        foreach($roles as $role){
             /** @var Role $role */
             if($role->can($permission_name, $permission_type)){
                 return true;
