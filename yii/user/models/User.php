@@ -4,6 +4,7 @@ namespace yii\user\models;
 
 use yii;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
 use yii\swiftmailer\Mailer;
 use yii\helpers\Inflector;
@@ -11,6 +12,7 @@ use yii\helpers\Security;
 use yii\user\models\UserRole;
 use yii\user\models\Role;
 use ReflectionClass;
+
 /**
  * User model
  *
@@ -567,5 +569,25 @@ class User extends ActiveRecord implements IdentityInterface {
         }
 
     }
+    
+    public function getRolesItems($selected = false){
+        $return = [];
+        
+        $query = Role::find()
+          ->joinWith('userRoles');
+          
+        if($selected){
+          $query->where(['tbl_user_role.role_id' => $this->id]);
+        }
+        
+        $roles = $query->all();
+        
+        if($selected){
+          return ArrayHelper::map($roles, 'id', 'id');
+        } else {
+          return ArrayHelper::map($roles, 'id', 'name');
+        }        
+        
+    }    
     
 }

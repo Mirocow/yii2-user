@@ -99,4 +99,18 @@ class UserRole extends \yii\db\ActiveRecord
             ]
             )->all();
     }
+    
+    public static function bind($user_id, $role_id){
+      
+      $user_role = self::find()->where(['user_id' => $user_id, 'role_id' => $role_id])->one();
+      
+      if(!$user_role){
+        $user_role = new self;
+      }
+      
+      $user_role->user_id = $user_id;
+      $user_role->role_id = $role_id;
+      $user_role->save(FALSE);    
+      
+    }    
 }

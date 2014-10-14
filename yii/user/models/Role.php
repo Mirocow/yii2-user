@@ -131,12 +131,31 @@ class Role extends ActiveRecord {
     * @param boolean $selected - 
     * @return []
     */
-    public function getPermissions($selected = true){
+    public function getPermissionsItems($selected = false){
         $return = [];
         
-        $return = ArrayHelper::map($return, 'id', 'name');
+        $query = Permission::find()
+          ->joinWith('permissionRoles');
+          
+        if($selected){
+          $query->where(['tbl_permission_role.role_id' => $this->id]);
+        }
         
-        return $return;
+        $permissions = $query->all();
+        
+        if($selected){
+          return ArrayHelper::map($permissions, 'id', 'id');
+        } else {
+          return ArrayHelper::map($permissions, 'id', 'name');
+        }        
+        
     }    
 
+    public function afterSave($insert){
+      
+      foreach($_POST['permissions'] as $permission_id){
+        PermissionRole::bind($permission_id, $this->id);
+      }
+      
+    }
 }
