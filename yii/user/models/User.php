@@ -7,6 +7,7 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use yii\swiftmailer\Mailer;
 use yii\helpers\Inflector;
+use yii\helpers\ArrayHelper;
 //use yii\helpers\Security;
 use yii\user\models\UserRole;
 use yii\user\models\Role;

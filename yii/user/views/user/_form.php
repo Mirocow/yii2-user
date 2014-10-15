@@ -22,7 +22,7 @@ use yii\widgets\ActiveForm;
 
 		<?= $form->field($model, 'newPassword') ?>
 
-		<?= $form->field($model, 'phone')->textInput(['maxlength' => 11]) ?>
+		<?//= $form->field($model, 'phone')->textInput(['maxlength' => 11]) ?>
 
 		<?= $form->field($model, 'password')->passwordInput(['maxlength' => 255]) ?>
     

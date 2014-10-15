@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 			'id',
 			'username',
-			'phone',
+			//'phone',
 			[
 					'attribute' => 'status',
 					'label' => 'Status',
