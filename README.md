@@ -19,3 +19,40 @@ ACL
 
     $isCanUserView = User::find(44)->can('view');
     $isCurrentUserView = Yii::$app->user->can('view');
+
+Use
+========
+
+Add in config file.
+
+```php
+    // ...
+    'modules' => [
+    
+        // Пользователь, Роль, Разрешения
+        'user' => [
+        
+          'class' => 'yii\user\Module',
+          
+          // Ищем Views по локальному пути
+          'views' => '@app/modules/core/views',
+          
+          // Обязательно должы быть Controllers
+          'controllers' => '@app/modules/core/controllers',
+          
+          // Обязательно должны быть реализованы Actions
+          'controllerNamespace' => 'app\modules\core\controllers',
+          
+          // Путь до шаплонов отправляемых писем
+          'emailViewPath' => '@app/modules/site/views/email',
+          
+          // Параметры
+          'requireUsername' => true,
+          
+          'usedCaptcha' => array('register', 'login'),
+          'pathCaptcha' => 'user/default/captcha',
+        ],
+        // ...
+    ],
+    // ...
+```
