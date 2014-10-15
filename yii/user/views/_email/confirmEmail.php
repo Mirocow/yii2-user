@@ -1,7 +1,4 @@
 <?php
-
-$i =1;
-
 //use yii\user\models\User;
 //use yii\user\models\Profile;
 //use yii\user\models\Session;

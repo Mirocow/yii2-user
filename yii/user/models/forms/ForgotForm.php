@@ -61,7 +61,7 @@ class ForgotForm extends Model {
         if ($this->_user === false) {
 
             // get user
-            $this->_user = User::find(["email" => $this->email]);
+            $this->_user = User::findOne(["email" => $this->email]);
         }
 
         // return stored user

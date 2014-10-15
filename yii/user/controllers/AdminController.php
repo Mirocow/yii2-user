@@ -5,10 +5,10 @@ namespace yii\user\controllers;
 use yii;
 use yii\web\Controller;
 use yii\web\HttpException;
-use yii\web\VerbFilter;
+use yii\filters\VerbFilter;
 use yii\user\models\User;
 use yii\user\models\Profile;
-use yii\user\models\search\UserSearch;
+use yii\user\models\UserSearch;
 
 /**
  * AdminController implements the CRUD actions for User model.
@@ -145,7 +145,7 @@ class AdminController extends Controller {
      * @throws HttpException if the model cannot be found
      */
     protected function findModel($id) {
-        if (($model = User::find($id)) !== null) {
+        if (($model = User::findOne($id)) !== null) {
             return $model;
         }
         else {

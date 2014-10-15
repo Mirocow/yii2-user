@@ -95,6 +95,8 @@ class Module extends \yii\base\Module {
     public $emailViewPath = "@user/views/_email";
     
     public $views = '@user/views';
+
+    public $layout = '@user/views/layouts/main';
     
     public $controllers = '@user/controllers';
     
@@ -118,7 +120,7 @@ class Module extends \yii\base\Module {
         $this->setViewPath($this->views);
         
         // set controllers path
-        $this->setControllerPath($this->controllers);
+        $this->setBasePath($this->controllers);
 
         // set use fields based on required fields
         if ($this->requireEmail) {
@@ -160,10 +162,10 @@ class Module extends \yii\base\Module {
      *
      * @inheritdoc
      */
-    public function createController($route) {
+    /*public function createController($route) {
 
         // check valid routes
-        $validRoutes = [$this->defaultRoute, "admin", "copy"];
+        $validRoutes = [$this->defaultRoute, "admin", "copy", "auth"];
         $isValid = false;
         foreach ($validRoutes as $validRoute) {
             if (strpos($route, $validRoute) === 0) {
@@ -175,7 +177,7 @@ class Module extends \yii\base\Module {
         return (empty($route) or $isValid)
             ? parent::createController($route)
             : parent::createController("{$this->defaultRoute}/{$route}");
-    }
+    }*/
 
     /**
      * Get a list of actions for this module. Used for debugging/initial installations

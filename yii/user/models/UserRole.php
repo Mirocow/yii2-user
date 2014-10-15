@@ -7,7 +7,7 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use yii\swiftmailer\Mailer;
 use yii\helpers\Inflector;
-use yii\helpers\Security;
+//use yii\helpers\Security;
 use yii\user\models\Role;
 use ReflectionClass;
 
@@ -86,7 +86,7 @@ class UserRole extends \yii\db\ActiveRecord
     
     public function can($permission_name, $permission_type = Permission::PERMISSION_DEFAULT){
         // isGrant
-        if(Role::find( ['id' => $this->role_id, 'grant' => 1] )){
+        if(Role::findOne( ['id' => $this->role_id, 'grant' => 1] )){
             return true;
         }
         return PermissionRole::find()
@@ -99,18 +99,4 @@ class UserRole extends \yii\db\ActiveRecord
             ]
             )->all();
     }
-    
-    public static function bind($user_id, $role_id){
-      
-      $user_role = self::find()->where(['user_id' => $user_id, 'role_id' => $role_id])->one();
-      
-      if(!$user_role){
-        $user_role = new self;
-      }
-      
-      $user_role->user_id = $user_id;
-      $user_role->role_id = $role_id;
-      $user_role->save(FALSE);    
-      
-    }    
 }

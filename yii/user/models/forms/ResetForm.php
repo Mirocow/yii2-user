@@ -125,7 +125,7 @@ class ResetForm extends Model {
         if ($this->_user === false) {
 
             // get user
-            $this->_user = User::find($this->session->user_id);
+            $this->_user = User::findOne($this->session->user_id);
         }
 
         // return stored user

@@ -28,8 +28,6 @@ class User extends \yii\web\User {
      * @inheritdoc
      */
     public $emailViewPath = '@user/views/mail';
-    
-    private $_allowCaching = [];
 
     /**
      * Check if user is logged in
@@ -77,32 +75,14 @@ class User extends \yii\web\User {
      */
     public function can($permissionName, $params = [], $allowCaching = true) {
 
-        // check for auth manager to call parent
-        $auth = Yii::$app->getAuthManager();
-        if ($auth) {
-            return parent::can($permissionName, $params, $allowCaching);
-        }
+        // get current user if not specified
+        $user = (!$params) ? $params : $this->getIdentity();
+
+        // check role attribute
+        //$roleAttribute = "can_{$permission}";
+        //return ($user and $user->role->$roleAttribute);
         
-        // otherwise use our own custom permission (via the role table)
-        /** @var yii\user\models\User $user */
-        $user = $this->getIdentity();
-        if(!$user){
-          // For anonymous
-          $user = new $this->identityClass;
-        }
-        
-        // Return from static cache
-        if($allowCaching){
-          if(!empty($this->_allowCaching[$user->id][$permissionName])){
-            return $this->_allowCaching[$user->id][$permissionName];
-          }
-        }        
-        
-        $access = $user->can($permissionName);
-        
-        $this->_allowCaching[$user->id][$permissionName] = $access;
-        
-        return $access;
+        return ($user and $user->can($permissionName));
         
     }
 

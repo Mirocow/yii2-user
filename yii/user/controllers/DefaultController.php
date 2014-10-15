@@ -5,11 +5,12 @@ namespace yii\user\controllers;
 use yii;
 use yii\web\Controller;
 use yii\web\Response;
-use yii\web\AccessControl;
+use yii\filters\AccessControl;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-use yii\base\Model;
-use yii\base\Event;
+//use yii\base\Model;
+//use yii\base\Event;
+//use yii\filters\VerbFilter;
 
 use yii\user\models\User;
 use yii\user\models\UserRole;
@@ -144,7 +145,7 @@ class DefaultController extends Controller {
         $user_role = new UserRole();
         
         /** @var Role $role */
-        $role = Role::find($role);
+        $role = Role::findOne($role);
         
         // Get extented models
         $this->models = $this->getExtentedModels();
@@ -336,7 +337,7 @@ class DefaultController extends Controller {
 
             // confirm user
             /** @var User $user */
-            $user = User::find($session->user_id);
+            $user = User::findOne($session->user_id);
             
             $user->confirm();
 

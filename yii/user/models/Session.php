@@ -5,7 +5,7 @@ namespace yii\user\models;
 use yii;
 use yii\db\ActiveRecord;
 use yii\web\HttpException;
-use yii\helpers\Security;
+//use yii\helpers\Security;
 use yii\user\models\User;
 
 /**
@@ -87,12 +87,10 @@ class Session extends ActiveRecord {
     public function behaviors() {
         return [
             'timestamp' => [
-                'class' => 'yii\behaviors\AutoTimestamp',
-                'attributes' => [
-                    // set only create_time because there is no update_time
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['create_time'],
-                ],
-                'timestamp' => function() { return date("Y-m-d H:i:s"); },
+              'class' => yii\behaviors\TimestampBehavior::className(),
+              'createdAtAttribute' => 'create_time',
+              'updatedAtAttribute' => 'update_time',
+              'value' => new yii\db\Expression('NOW()'),
             ],
         ];
     }
@@ -128,7 +126,7 @@ class Session extends ActiveRecord {
         $model->type = $type;
         $model->create_time = date("Y-m-d H:i:s");
         $model->expire_time = $expireTime;
-        $model->sid = Security::generateRandomKey();
+        $model->sid = Yii::$app->getSecurity()->generateRandomKey();
         $model->save();
         
         if($model->hasErrors()){

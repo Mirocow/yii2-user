@@ -60,18 +60,4 @@ class PermissionRole extends \yii\db\ActiveRecord
     {
         return $this->hasOne(UserRole::className(), ['role_id' => 'role_id']);
     }
-    
-    public static function bind($permission_id, $role_id){
-      
-      $permission_role = self::find()->where(['permission_id' => $permission_id, 'role_id' => $role_id])->one();
-      
-      if(!$permission_role){
-        $permission_role = new self;
-      }
-      
-      $permission_role->permission_id = $permission_id;
-      $permission_role->role_id = $role_id;
-      $permission_role->save(FALSE);    
-      
-    }    
 }
