@@ -23,7 +23,7 @@ ACL
 Use
 ========
 
-For simle use
+For simple use
 
 ```php
     // ...
