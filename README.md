@@ -23,7 +23,23 @@ ACL
 Use
 ========
 
-Add in config file.
+For simle use
+
+```php
+    // ...
+    'modules' => [
+    
+        // Пользователь, Роль, Разрешения
+        'user' => [
+        
+          'class' => 'yii\user\Module',
+
+        ],
+        // ...
+    ],
+   
+
+If you want overide base setting pliase add in config file.
 
 ```php
     // ...
