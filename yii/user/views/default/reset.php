@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <p>Password reset</p>
 
-            <p><?= Html::a("Log in here", ["/user/login"]) ?></p>
+            <p><?= Html::a("Log in here", ["/user/default/login"]) ?></p>
 
         </div>
 

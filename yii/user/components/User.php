@@ -22,12 +22,14 @@ class User extends \yii\web\User {
     /**
      * @inheritdoc
      */
-    public $loginUrl = ["/user/login"];
+    public $loginUrl = ["/user/default/login"];
 
     /**
      * @inheritdoc
      */
     public $emailViewPath = '@user/views/mail';
+    
+    private $_allowCaching = [];
 
     /**
      * Check if user is logged in
@@ -75,14 +77,32 @@ class User extends \yii\web\User {
      */
     public function can($permissionName, $params = [], $allowCaching = true) {
 
-        // get current user if not specified
-        $user = (!$params) ? $params : $this->getIdentity();
-
-        // check role attribute
-        //$roleAttribute = "can_{$permission}";
-        //return ($user and $user->role->$roleAttribute);
+        // check for auth manager to call parent
+        $auth = Yii::$app->getAuthManager();
+        if ($auth) {
+            return parent::can($permissionName, $params, $allowCaching);
+        }
         
-        return ($user and $user->can($permissionName));
+        // otherwise use our own custom permission (via the role table)
+        /** @var yii\user\models\User $user */
+        $user = $this->getIdentity();
+        if(!$user){
+          // For anonymous
+          $user = new $this->identityClass;
+        }
+        
+        // Return from static cache
+        if($allowCaching){
+          if(!empty($this->_allowCaching[$user->id][$permissionName])){
+            return $this->_allowCaching[$user->id][$permissionName];
+          }
+        }        
+        
+        $access = $user->can($permissionName);
+        
+        $this->_allowCaching[$user->id][$permissionName] = $access;
+        
+        return $access;
         
     }
 
@@ -101,8 +121,10 @@ class User extends \yii\web\User {
         $user = ($user !== false) ? $user : $this->getIdentity();
         if(is_numeric($role)){
           return ($user and $user->hasRole($role));
-        } else {
+        } elseif(is_string($role)) {
           return ($user and $user->hasRoleName($role));  
+        } else {
+          return ($user and $user->hasRole($role));
         }
     }
 }

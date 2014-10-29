@@ -124,16 +124,16 @@ class LoginForm extends Model {
         if ($this->_user === false) {
 
             // build query based on email and/or username login properties
-            $query = User::find();
+            $user = User::find();
             if (Yii::$app->getModule("user")->loginEmail) {
-                $query->orWhere(["email" => $this->username]);
+                $user->orWhere(["email" => $this->username]);
             }
             if (Yii::$app->getModule("user")->loginUsername) {
-                $query->orWhere(["username" => $this->username]);
+                $user->orWhere(["username" => $this->username]);
             }
 
             // get and store user
-            $this->_user = $query->one();
+            $this->_user = $user->one();
         }
 
         // return stored user

@@ -94,10 +94,12 @@ class Role extends ActiveRecord {
     public function behaviors() {
         return [
             'timestamp' => [
-              'class' => yii\behaviors\TimestampBehavior::className(),
-              'createdAtAttribute' => 'create_time',
-              'updatedAtAttribute' => 'update_time',
-              'value' => new yii\db\Expression('NOW()'),
+                'class' => 'yii\behaviors\AutoTimestamp',
+                'timestamp' => function() { return date("Y-m-d H:i:s"); },
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+                ],                 
             ],
         ];
     }
@@ -122,40 +124,42 @@ class Role extends ActiveRecord {
 
         return $dropdown;
     }
-
+    
     /**
-     * put your comment there...
-     *
-     * @param boolean $selected -
-     * @return []
-     */
+    * put your comment there...
+    * 
+    * @param boolean $selected - 
+    * @return []
+    */
     public function getPermissionsItems($selected = false){
         $return = [];
-
+        
         $query = Permission::find()
           ->joinWith('permissionRoles');
-
+          
         if($selected){
-            $query->where(['tbl_permission_role.role_id' => $this->id]);
+          $query->where(['tbl_permission_role.role_id' => $this->id]);
         }
-
+        
         $permissions = $query->all();
-
+        
         if($selected){
-            return ArrayHelper::map($permissions, 'id', 'id');
+          return ArrayHelper::map($permissions, 'id', 'id');
         } else {
-            return ArrayHelper::map($permissions, 'id', 'name');
+          return ArrayHelper::map($permissions, 'id', 'name');
+        }        
+        
+    }    
+
+    public function afterSave($insert){
+      
+      $permissions = Yii::$app->request->getPostParam('permissions');
+      
+      if($permissions){
+        foreach($permissions as $permission_id){
+          PermissionRole::bind($permission_id, $this->id);
         }
-
+      }
+      
     }
-
-    public function afterSave($insert, $changedAttributes){
-
-        foreach($_POST['permissions'] as $permission_id){
-            PermissionRole::bind($permission_id, $this->id);
-        }
-
-    }
-
-
 }

@@ -4,14 +4,15 @@ namespace yii\user\models;
 
 use yii;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
 use yii\swiftmailer\Mailer;
 use yii\helpers\Inflector;
-use yii\helpers\ArrayHelper;
-//use yii\helpers\Security;
+use yii\helpers\Security;
 use yii\user\models\UserRole;
 use yii\user\models\Role;
 use ReflectionClass;
+
 /**
  * User model
  *
@@ -61,6 +62,8 @@ class User extends ActiveRecord implements IdentityInterface {
     
     public $verifyCode;
     
+    public $default_roles = [0];
+    
     /**
      * @inheritdoc
      */
@@ -75,6 +78,9 @@ class User extends ActiveRecord implements IdentityInterface {
 
         // set initial rules
         $rules = [
+        
+            // Register
+             [['email', 'username'], 'required', 'on' => ['register']],
         
             // Status
             [['status'], 'string'],
@@ -204,10 +210,12 @@ class User extends ActiveRecord implements IdentityInterface {
     public function behaviors() {
         return [
             'timestamp' => [
-              'class' => yii\behaviors\TimestampBehavior::className(),
-              'createdAtAttribute' => 'create_time',
-              'updatedAtAttribute' => 'update_time',
-              'value' => new yii\db\Expression('NOW()'),
+                'class' => 'yii\behaviors\AutoTimestamp',
+                'timestamp' => function() { return date("Y-m-d H:i:s"); },
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+                ],                
             ],
 
         ];
@@ -217,7 +225,7 @@ class User extends ActiveRecord implements IdentityInterface {
      * @inheritdoc
      */
     public static function findIdentity($id) {
-        return static::findOne($id);
+        return static::find($id);
     }
 
     /**
@@ -239,14 +247,6 @@ class User extends ActiveRecord implements IdentityInterface {
      */
     public function validateAuthKey($authKey) {
         return $this->id === $authKey;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        return static::findOne(['access_token' => $token]);
     }
 
     /**
@@ -369,7 +369,7 @@ class User extends ActiveRecord implements IdentityInterface {
      * @return static
      */
     public function encryptNewPassword() {
-        $this->password = Yii::$app->getSecurity()->generatePasswordHash($this->newPassword);
+        $this->password = Security::generatePasswordHash($this->newPassword);
         return $this;
     }
 
@@ -380,7 +380,7 @@ class User extends ActiveRecord implements IdentityInterface {
      * @return bool
      */
     public function verifyPassword($password) {
-        return Yii::$app->getSecurity()->validatePassword($password, $this->password);
+        return Security::validatePassword($password, $this->password);
     }
 
     /**
@@ -505,7 +505,15 @@ class User extends ActiveRecord implements IdentityInterface {
     
     public function can($permission_name, $permission_type = Permission::PERMISSION_DEFAULT){
         $permissions = [];
-        foreach($this->roles as $role){
+        
+        $roles = $this->roles;
+        
+        if(!$roles){
+          foreach($this->default_roles as $role_id){
+            $roles[] = UserRole::find()->where(['role_id' => $role_id])->one();
+          }
+        }
+        foreach($roles as $role){
             /** @var Role $role */
             if($role->can($permission_name, $permission_type)){
                 return true;
@@ -564,25 +572,25 @@ class User extends ActiveRecord implements IdentityInterface {
         }
 
     }
-
+    
     public function getRolesItems($selected = false){
         $return = [];
-
+        
         $query = Role::find()
           ->joinWith('userRoles');
-
+          
         if($selected){
-            $query->where(['tbl_user_role.role_id' => $this->id]);
+          $query->where(['tbl_user_role.role_id' => $this->id]);
         }
-
+        
         $roles = $query->all();
-
+        
         if($selected){
-            return ArrayHelper::map($roles, 'id', 'id');
+          return ArrayHelper::map($roles, 'id', 'id');
         } else {
-            return ArrayHelper::map($roles, 'id', 'name');
-        }
-
-    }
+          return ArrayHelper::map($roles, 'id', 'name');
+        }        
+        
+    }    
     
 }

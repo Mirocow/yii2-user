@@ -95,8 +95,6 @@ class Module extends \yii\base\Module {
     public $emailViewPath = "@user/views/_email";
     
     public $views = '@user/views';
-
-    public $layout = '@user/views/layouts/main';
     
     public $controllers = '@user/controllers';
     
@@ -120,7 +118,7 @@ class Module extends \yii\base\Module {
         $this->setViewPath($this->views);
         
         // set controllers path
-        $this->setBasePath($this->controllers);
+        $this->setControllerPath($this->controllers);
 
         // set use fields based on required fields
         if ($this->requireEmail) {
@@ -165,7 +163,7 @@ class Module extends \yii\base\Module {
     /*public function createController($route) {
 
         // check valid routes
-        $validRoutes = [$this->defaultRoute, "admin", "copy", "auth"];
+        $validRoutes = [$this->defaultRoute, "admin", "copy"];
         $isValid = false;
         foreach ($validRoutes as $validRoute) {
             if (strpos($route, $validRoute) === 0) {
@@ -186,54 +184,56 @@ class Module extends \yii\base\Module {
 
         return [
             "User" => [
-                'url' => ["/{$this->id}"],
+                'url' => ["/{$this->id}/default/index"],
                 "description" => "",
             ],
             
             "Login" => [
-                'url' => ["/{$this->id}/login"],
+                'url' => ["/{$this->id}/default/login"],
                 'description' => '',
             ],
             
-            "Logout" => ["/{$this->id}/logout"],
+            "Logout" => ["/{$this->id}/default/logout"],
 
             "Register" => [
-                "url" => ["/{$this->id}/register&type=xxxxx"],
+                "url" => ["/{$this->id}/default/register&type=xxxxx"],
                 "description" => "Регистрация пользователя с указанием типа",
             ],
             
             "Account" => [
                 "url" => [
-                    "/{$this->id}/account",
-                    "/{$this->id}/account?hash=xxxxxxxxx&sid=xxxxxxxxxx"
+                    "/{$this->id}/default/account",
+                    "/{$this->id}/default/account?hash=xxxxxxxxx&sid=xxxxxxxxxx"
                     ],
                 "description" => "Confirm email address. Automatically generated with key",
             ],            
 
             "Profile" => [
-                "url" => ["/{$this->id}/profile?type=xxxxxxxxx"],
+                "url" => ["/{$this->id}/default/profile?type=xxxxxxxxx"],
                 "description" => "Profile by type",
             ],            
             
-            "Forgot password" => ["/{$this->id}/forgot"],
+            "Forgot password" => ["/{$this->id}/default/forgot"],
             
-            "Admin" => ["/{$this->id}/admin"],
+            "Change password" => ["/{$this->id}/default/change-password"],
+            
+            "Admin" => ["/{$this->id}/default/admin"],
 
             "Resend" => [
-                "url" => ["/{$this->id}/resend"],
+                "url" => ["/{$this->id}/default/resend"],
                 "description" => "Resend email change confirmation (NOT FOR REGISTRATION / EMAIL ACTIVATION)",
             ],
             "Cancel" => [
-                "url" => ["/{$this->id}/cancel"],
+                "url" => ["/{$this->id}/default/cancel"],
                 "description" => "Cancel email change confirmation. <br/>This and resend appear on the 'Account' page",
             ],
 
             "Confirm" => [
-                "url" => ["/{$this->id}/confirm?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
+                "url" => ["/{$this->id}/default/confirm?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
                 "description" => "Confirm email address. Automatically generated with key",
             ],
             "Reset" => [
-                "url" => ["/{$this->id}/reset?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
+                "url" => ["/{$this->id}/default/reset?hash=xxxxxxxxx&sid=xxxxxxxxxx"],
                 "description" => "Reset password. Automatically generated with key from 'Forgot password' page",
             ],
             

@@ -63,10 +63,12 @@ class Profile extends ActiveRecord {
     public function behaviors() {
         return [
             'timestamp' => [
-              'class' => yii\behaviors\TimestampBehavior::className(),
-              'createdAtAttribute' => 'create_time',
-              'updatedAtAttribute' => 'update_time',
-              'value' => new yii\db\Expression('NOW()'),
+                'class' => 'yii\behaviors\AutoTimestamp',
+                'timestamp' => function() { return date("Y-m-d H:i:s"); },
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => 'create_time',
+                    ActiveRecord::EVENT_BEFORE_UPDATE => 'update_time',
+                ],                 
             ],
         ];
     }

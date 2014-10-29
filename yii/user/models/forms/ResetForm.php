@@ -44,10 +44,6 @@ class ResetForm extends Model {
 
         // set initial rules
         $rules = [
-//            [["email"], "required"],
-//            [["email"], "email"],
-//            [["email"], "validateSessionEmail"],
-//            [["email"], "filter", "filter" => "trim"],
             [["newPassword", "newPasswordConfirm"], "required"],
             [["newPasswordConfirm"], "compare", "compareAttribute" => "newPassword", "message" => "Passwords do not match"]
         ];
@@ -120,12 +116,21 @@ class ResetForm extends Model {
      * @return User|null
      */
     public function getUser() {
+      
+        if(!Yii::$app->user->isGuest){
+          
+           $this->_user = Yii::$app->user->identity;
 
-        // check if we need to get user
-        if ($this->_user === false) {
+        } else {
+          
+          // check if we need to get user
+          if ($this->_user === false) {
 
-            // get user
-            $this->_user = User::findOne($this->session->user_id);
+              // get user
+              $this->_user = User::find($this->session->user_id);
+              
+          }
+        
         }
 
         // return stored user
@@ -146,10 +151,6 @@ class ResetForm extends Model {
             $user = $this->getUser();
             $user->newPassword = $this->newPassword;
             $user->save(false);
-
-            // consume session
-            $session = $this->session;
-            $session->consume();
 
             return true;
         }

@@ -5,7 +5,7 @@ namespace yii\user\models;
 use yii;
 use yii\db\ActiveRecord;
 use yii\web\HttpException;
-//use yii\helpers\Security;
+use yii\helpers\Security;
 use yii\user\models\User;
 
 /**
@@ -87,10 +87,12 @@ class Session extends ActiveRecord {
     public function behaviors() {
         return [
             'timestamp' => [
-              'class' => yii\behaviors\TimestampBehavior::className(),
-              'createdAtAttribute' => 'create_time',
-              'updatedAtAttribute' => 'update_time',
-              'value' => new yii\db\Expression('NOW()'),
+                'class' => 'yii\behaviors\AutoTimestamp',
+                'attributes' => [
+                    // set only create_time because there is no update_time
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['create_time'],
+                ],
+                'timestamp' => function() { return date("Y-m-d H:i:s"); },
             ],
         ];
     }
@@ -109,7 +111,14 @@ class Session extends ActiveRecord {
      *
      * @param int $userId
      * @param int $type
-     * @param string $expireTime
+     * @param string $expireTime format of strtotime()
+     *  Examples:
+     *    - now
+     *    - 10 September 2000
+     *    - +1 day
+     *    - +2 week
+     *    - +1 month
+     *    - +1 week 2 days 4 hours 2 seconds
      * @return static
      */
     public static function generate($userId, $type, $expireTime = null) {
@@ -125,8 +134,10 @@ class Session extends ActiveRecord {
         $model->user_id = $userId;
         $model->type = $type;
         $model->create_time = date("Y-m-d H:i:s");
-        $model->expire_time = $expireTime;
-        $model->sid = Yii::$app->getSecurity()->generateRandomKey();
+        if($expireTime){
+          $model->expire_time = date("Y-m-d H:i:s", strtotime($expireTime, strtotime($model->create_time)));
+        }
+        $model->sid = Security::generateRandomKey();
         $model->save();
         
         if($model->hasErrors()){

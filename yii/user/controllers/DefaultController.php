@@ -5,12 +5,11 @@ namespace yii\user\controllers;
 use yii;
 use yii\web\Controller;
 use yii\web\Response;
-use yii\filters\AccessControl;
+use yii\web\AccessControl;
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-//use yii\base\Model;
-//use yii\base\Event;
-//use yii\filters\VerbFilter;
+use yii\base\Model;
+use yii\base\Event;
 
 use yii\user\models\User;
 use yii\user\models\UserRole;
@@ -48,7 +47,7 @@ class DefaultController extends Controller {
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['index', 'confirm', 'captcha'],
+                        'actions' => ['index', 'confirm', 'captcha', 'change-password'],
                         'allow' => true,
                         'roles' => ['?', '@'],
                     ],
@@ -92,11 +91,11 @@ class DefaultController extends Controller {
         }
         // redirect to login page if user is guest
         elseif (Yii::$app->user->isGuest) {
-            return $this->redirect(["/user/login"]);
+            return $this->redirect(["/user/default/login"]);
         }
         // redirect to account page if user is logged in
         else {
-            return $this->redirect(["/user/account"]);
+            return $this->redirect(["/user/default/account"]);
         }
     }
 
@@ -131,24 +130,21 @@ class DefaultController extends Controller {
     /**
      * Display register page
      */
-    public function actionRegister($role = Role::ROLE_USER) {
+    public function actionRegister($role_id = Role::ROLE_USER) {
 
         $validate = false;
-
-        /** @var User $user */
-        $user = $this->getUser(["scenario" => "register"]);        
-        
-        /** @var Profile $Profile */
-        $profile = $this->getProfile();
-        
-        /** @var UserRole $user_role */
-        $user_role = new UserRole();
-        
-        /** @var Role $role */
-        $role = Role::findOne($role);
         
         // Get extented models
-        $this->models = $this->getExtentedModels();
+        $this->models = $this->getExtentedModels($role_id);        
+        
+        // Get base models
+        $user = &$this->models['user'];
+        
+        $profile = &$this->models['profile'];
+        
+        $role = &$this->models['role'];
+        
+        $user_role = &$this->models['user_role'];        
 
         if ($user->load($_POST)) {
           
@@ -156,26 +152,13 @@ class DefaultController extends Controller {
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;                                
                 
-                 $this->models = array_merge(
-                    [
-                        'role' => $role,
-                        'user_role' => $user_role,
-                        'user' => $user,
-                        'profile' => $profile,
-                    ],
-                     $this->models
-                );
-                
                 $result = [];
-                
-                $validate = true;
                 
                 foreach ($this->models as $model) {
                     $model->load($_POST);
                     $model->validate(null);
                     foreach ($model->getErrors() as $attribute => $errors) {
                         $result[Html::getInputId($model, $attribute)] = $errors;
-                        $validate = false;
                     }
                 }
                 
@@ -183,52 +166,37 @@ class DefaultController extends Controller {
                 
                 return $result;                
                 
-            }                       
+            }
 
             $transaction = Yii::$app->db->beginTransaction();
 
             // validate for normal request
             if ($user->validate() and $profile->validate()) {
-              
-                
                 
                 // perform registration
                 $user->register();
                 $_POST[ self::getClassName($user) ] = $user->getAttributes();
                 
-                // profile registration
+                // attached user profile
                 $profile->register($user->id);
                 $_POST[ self::getClassName($profile) ] = $profile->getAttributes();
                 
                 // attached user role                
-                $user_role->register($user->id, Role::ROLE_USER);
+                $user_role->register($user->id, $role->id);
                 $_POST[ self::getClassName($user_role) ] = $user_role->getAttributes();
                 
                 // Save extented models
                 foreach($this->models as $model){
+                  
                     $model->load($_POST);
                     
-                    if(!$model->validate()){
-                        $validate = false;
-                        continue;
+                    if($validate = $model->validate()){
+                        $model->save(false);
+                        // Add extented models
+                        $_POST[ self::getClassName($model) ] = $model->getAttributes();
                     }
                     
-                    $model->save(false);
-                    
-                    // Add extented models
-                    $_POST[ self::getClassName($model) ] = $model->getAttributes();                    
-                }
-                
-                // Required models
-                /*$this->models = array_merge(
-                    [
-                        'role' => $role,
-                        'user_role' => $user_role,
-                        'user' => $user,
-                        'profile' => $profile,
-                    ],
-                     $this->models
-                );*/                
+                }               
 
             }
 
@@ -253,17 +221,6 @@ class DefaultController extends Controller {
             $transaction->rollback();
 
         }
-
-        // Required models
-        $this->models = array_merge(
-            [
-                'role' => $role,
-                'user_role' => $user_role,
-                'user' => $user,
-                'profile' => $profile,
-            ],
-             $this->models
-        );
 
         // render view
         return $this->render($this->viewRegister,  $this->models);
@@ -337,7 +294,7 @@ class DefaultController extends Controller {
 
             // confirm user
             /** @var User $user */
-            $user = User::findOne($session->user_id);
+            $user = User::find($session->user_id);
             
             $user->confirm();
 
@@ -456,7 +413,7 @@ class DefaultController extends Controller {
         }
 
         // go to account page
-        return $this->redirect(["/user/account"]);
+        return $this->redirect(["/user/default/account"]);
     }
 
     /**
@@ -480,7 +437,7 @@ class DefaultController extends Controller {
         }
 
         // go to account page
-        return $this->redirect(["/user/account"]);
+        return $this->redirect(["/user/default/account"]);
     }
 
     /**
@@ -503,6 +460,27 @@ class DefaultController extends Controller {
             'model' => $model,
         ]);
     }
+    
+    /**
+     * Cachnge password
+     */
+    public function actionChangePassword() {
+
+        // attempt to load $_POST data, validate, and send email
+        $model = new ResetForm();
+        if ($model->load($_POST) && $model->resetPassword()) {
+
+            // set flash and refresh page
+            Yii::$app->session->setFlash('Change-password-success');
+            
+            return $this->refresh();
+        }
+
+        // render view
+        return $this->render('change_password', [
+            'model' => $model,
+        ]);
+    }    
 
     /**
      * Reset password
@@ -544,8 +522,24 @@ class DefaultController extends Controller {
         return new Profile ($params);
     }
     
-    protected function getExtentedModels(){
-        return [];
+    protected function getExtentedModels($role_id){    
+      
+        return [
+        
+          /** @var User $user */
+          'user' => $this->getUser(["scenario" => "register"]),        
+          
+          /** @var Profile $Profile */
+          'profile' => $this->getProfile(),
+          
+          /** @var UserRole $user_role */
+          'user_role' => new UserRole(),
+          
+          /** @var Role $role */
+          'role' => Role::find($role_id),      
+               
+        ];
+        
     }
             
     /*protected static function LoginForm($params = []){
