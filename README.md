@@ -52,31 +52,6 @@ or add
 
 to the require section of your application's `composer.json` file.
 
-Configurate
-=====
-
-```php
-
-	'components' => [
-        // Пользователь, Роль, Разрешения
-        'user' => [
-            'class' => 'yii\user\Module',
-            // Ищем Views по локальному пути
-            'views' => '@app/modules/core/views',
-            // Обязательно должы быть Controllers
-            'controllers' => '@app/modules/core/controllers',
-            // Обязательно должны быть реализованы Actions
-            'controllerNamespace' => 'app\modules\core\controllers',
-            // Путь до шаплонов отправляемых писем
-            'emailViewPath' => '@app/email',
-            // Параметры
-            'requireUsername' => true,
-            'usedCaptcha' => array('register', 'login'),
-            'pathCaptcha' => 'user/default/captcha',
-        ],
-      ] 
-```    
-
 Use
 ========
 
